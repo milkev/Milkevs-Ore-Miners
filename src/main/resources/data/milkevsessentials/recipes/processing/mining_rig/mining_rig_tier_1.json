@@ -1,0 +1,16 @@
+{
+  "type": "milkevsoreminers:miningrig_tier_1",
+  "powerCost": 1000,
+  "powerUsageSpeed": 10,
+  "output": [
+    "100;minecraft:raw_iron",
+    "30;minecraft:raw_gold",
+    "50;minecraft:raw_copper",
+    "1;minecraft:diamond",
+    "30;minecraft:lapis_lazuli",
+    "20;minecraft:redstone",
+    "10;minecraft:glowstone_dust",
+    "10;minecraft:quartz",
+    "10;minecraft:emerald",
+    "10;minecraft:amethyst_shard"]
+}

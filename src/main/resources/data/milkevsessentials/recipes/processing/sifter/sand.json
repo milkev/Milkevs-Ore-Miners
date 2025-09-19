@@ -1,0 +1,8 @@
+{
+  "type": "milkevsoreminers:sifter",
+  "input": "minecraft:sand",
+  "chance": 1,
+  "output": [
+    "1;minecraft:dirt",
+    "2;minecraft:glass"]
+}

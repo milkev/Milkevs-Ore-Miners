@@ -1,0 +1,14 @@
+
+{
+  "required": true,
+  "package": "net.milkev.milkevsoreminers.common.mixins",
+  "compatibilityLevel": "JAVA_16",
+  "plugin": "net.milkev.milkevsoreminers.common.compat.MilkevsOreMinersMixinCondition",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
