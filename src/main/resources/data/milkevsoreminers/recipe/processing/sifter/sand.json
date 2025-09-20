@@ -1,12 +1,11 @@
 {
   "type": "milkevsoreminers:sifter",
-  "chance": "blue",
   "input": {
     "count": 1,
     "id": "minecraft:sand"
   },
+  "chance": 1,
   "output": [
-    "1;minecraft:iron_ore",
-    "2;minecraft:copper_ore"
-  ]
+    "1;minecraft:dirt",
+    "2;minecraft:glass"]
 }
