@@ -31,7 +31,7 @@ public class MilkevsOreMiners implements ModInitializer {
 	public static final RecipeType<SifterRecipe> SIFTER_RECIPE_TYPE = new RecipeType<SifterRecipe>() {
 		@Override
 		public String toString() {
-			return id("sifter").toString();
+			return "sifter";
 		}
 	};
 			

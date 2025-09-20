@@ -8,6 +8,7 @@ import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
@@ -44,20 +45,15 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
         super(MilkevsOreMiners.SIFTER_BLOCK_ENTITY, blockPos, blockState);
     }
 
-    public ActionResult interact(ItemStack itemStack) {
-        System.out.print("Recipes; " + world.getRecipeManager().listAllOfType(MilkevsOreMiners.SIFTER_RECIPE_TYPE));
+    public ActionResult interact(ItemStack itemStack, PlayerEntity playerEntity) {
         //if(!world.isClient()) {
             if (inventory.isEmpty()) {
-                System.out.println("test: " + this);
                 //insert block into sifter
                 if (blockAllowedToBeSifted(itemStack)) {
-                    System.out.println("TRUE");
                     ItemStack input = itemStack.copy();
                     input.setCount(1);
                     inventory.setStack(0, input);
-                    System.out.println(inventory.getItems());
-                    itemStack.decrement(1);
-                    System.out.println("decremented!");
+                    if(!playerEntity.isCreative()) {itemStack.decrement(1);}
                     setProgress(10);
                     return ActionResult.CONSUME;
                 }
@@ -96,7 +92,7 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
         Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(itemStack), world);
         
         if(matches.isPresent()) {
-            if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance()) {
+            if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance() || matches.get().value().chance() == 100) {
                 
                 return HandleDrop.handleDrop(matches.get().value().output());
             } else {
