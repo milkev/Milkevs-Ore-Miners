@@ -28,7 +28,13 @@ public class MilkevsOreMiners implements ModInitializer {
 	public static final SifterBlock SIFTER_BLOCK = new SifterBlock(AbstractBlock.Settings.create().strength(50));
 	public static final BlockEntityType<SifterBlockEntity> SIFTER_BLOCK_ENTITY = BlockEntityType.Builder.create(SifterBlockEntity::new, SIFTER_BLOCK).build(null);
 	public static final RecipeSerializer<SifterRecipe> SIFTER_RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("sifter"), new SifterRecipe.SifterRecipeSerializer());
-	public static final RecipeType<SifterRecipe> SIFTER_RECIPE_TYPE = registerRecipe("sifter");
+	public static final RecipeType<SifterRecipe> SIFTER_RECIPE_TYPE = new RecipeType<SifterRecipe>() {
+		@Override
+		public String toString() {
+			return id("sifter").toString();
+		}
+	};
+			
 	
 	/*
 	public static final AdvancedSifterBlock ADVANCED_SIFTER_BLOCK = new AdvancedSifterBlock(AbstractBlock.Settings.create().strength(50));
@@ -65,6 +71,7 @@ public class MilkevsOreMiners implements ModInitializer {
 		
 		RegisterBlock("sifter", SIFTER_BLOCK, Rarity.UNCOMMON, ItemGroups.TOOLS);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("sifter_block_entity"), SIFTER_BLOCK_ENTITY);
+		registerRecipe("sifter", SIFTER_RECIPE_TYPE);
 		
 		/*
 		RegisterBlock("advanced_sifter", ADVANCED_SIFTER_BLOCK, Rarity.RARE, ItemGroups.TOOLS);
@@ -115,9 +122,13 @@ public class MilkevsOreMiners implements ModInitializer {
 	static <T extends Recipe<?>> RecipeType<T> registerRecipe(final String string) {
         return Registry.register(Registries.RECIPE_TYPE, id(string), new RecipeType<T>() {
             public String toString() {
-                return string;
+                return id(string).toString();
             }
         });
+    }
+	
+	static <T extends Recipe<?>> RecipeType<T> registerRecipe(final String string, RecipeType<T> recipeType) {
+        return Registry.register(Registries.RECIPE_TYPE, id(string), recipeType);
     }
 	
 	static <S extends RecipeSerializer<T>, T extends Recipe<?>> S registerSerializer(String string, S recipeSerializer) {

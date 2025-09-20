@@ -7,3 +7,4 @@
 *.kra
 *.kra~
 /src/main/generated
+/remappedSrc/
