@@ -1,6 +1,9 @@
 package net.milkev.milkevsoreminers.common.blockEntities;
 
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.recipes.HandleDrop;
+import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
+import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedInventory;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -8,16 +11,28 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.context.LootContextParameterSet;
+import net.minecraft.loot.context.LootContextType;
+import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedInventory, SidedInventory {
 
@@ -33,6 +48,7 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
         System.out.print("Recipes; " + world.getRecipeManager().listAllOfType(MilkevsOreMiners.SIFTER_RECIPE_TYPE));
         //if(!world.isClient()) {
             if (inventory.isEmpty()) {
+                System.out.println("test: " + this);
                 //insert block into sifter
                 if (blockAllowedToBeSifted(itemStack)) {
                     System.out.println("TRUE");
@@ -64,9 +80,8 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
 
     private boolean blockAllowedToBeSifted(ItemStack itemStack) {
         assert world != null;
-        //Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(SifterRecipe.Type.INSTANCE, new MyRecipeInput.Single(itemStack), world);
-        //return matches.isPresent();
-        return false;
+        Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(itemStack), world);
+        return matches.isPresent();
     }
     
     private void dropItem(ItemStack itemStack) {
@@ -78,19 +93,18 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
     private ItemStack getDrop() {
         ItemStack itemStack = inventory.getStack(0);
 
-        //Optional<RecipeEntry<SifterRecipe>> match = world.getRecipeManager().getFirstMatch(SifterRecipe.Type.INSTANCE, new MyRecipeInput.Single(itemStack), world);
-        /*
-        if(match.isPresent()) {
-            if(((float) Random.create().nextBetween(0, 100))/100 < match.get().value().getChance()) {
-                return match.get().value().getOutput().copy();
+        Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(itemStack), world);
+        
+        if(matches.isPresent()) {
+            if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance()) {
+                
+                return HandleDrop.handleDrop(matches.get().value().output());
             } else {
                 return null;
             }
         } else {
             return null;
         }
-         */
-        return null;
     }
 
     public void setProgress(int i) {

@@ -6,11 +6,11 @@ import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.milkev.milkevsoreminers.common.blockEntities.SifterBlockEntity;
 import net.milkev.milkevsoreminers.common.blocks.SifterBlock;
 import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
-import net.milkev.milkevsoreminers.common.recipes.SifterRecipeSerializer;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.*;
+import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
@@ -23,11 +23,11 @@ import net.minecraft.util.Rarity;
 public class MilkevsOreMiners implements ModInitializer {
 
 	public static final String MOD_ID = "milkevsoreminers";
-
+	
 	//Sifter
 	public static final SifterBlock SIFTER_BLOCK = new SifterBlock(AbstractBlock.Settings.create().strength(50));
 	public static final BlockEntityType<SifterBlockEntity> SIFTER_BLOCK_ENTITY = BlockEntityType.Builder.create(SifterBlockEntity::new, SIFTER_BLOCK).build(null);
-	public static final RecipeSerializer<SifterRecipe> SIFTER_RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("sifter"), new SifterRecipeSerializer());
+	public static final RecipeSerializer<SifterRecipe> SIFTER_RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("sifter"), new SifterRecipe.SifterRecipeSerializer());
 	public static final RecipeType<SifterRecipe> SIFTER_RECIPE_TYPE = registerRecipe("sifter");
 	
 	/*
@@ -62,7 +62,7 @@ public class MilkevsOreMiners implements ModInitializer {
 		//AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
 		//Config registered in MilkevsOreMinersMixinCondition.java
 		config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
-
+		
 		RegisterBlock("sifter", SIFTER_BLOCK, Rarity.UNCOMMON, ItemGroups.TOOLS);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("sifter_block_entity"), SIFTER_BLOCK_ENTITY);
 		

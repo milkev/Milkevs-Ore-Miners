@@ -23,9 +23,6 @@
     ],
     "client": [
       "net.milkev.milkevsoreminers.client.MilkevsOreMinersClient"
-    ],
-    "fabric-datagen": [
-      "net.milkev.milkevsoreminers.client.datagen.MilkevsOreMinersDatagen"
     ]
   },
   "mixins": [
