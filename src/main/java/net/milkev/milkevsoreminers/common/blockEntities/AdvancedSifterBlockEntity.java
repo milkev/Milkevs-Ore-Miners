@@ -63,7 +63,8 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
             Optional<RecipeEntry<AdvancedSifterRecipe>> match = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(inventory.getStack(0)), world);
             if (match.isPresent()) {
                 //System.out.println("Match is present!");
-                AdvancedSifterRecipe recipe = match.get().value();
+                AdvancedSifterRecipe recipe = match.get().value();                 
+                inventory.addStack(RecipeUtils.handleDrop(recipe.output(), world));
                 if (powerUsage == -666) {
                     //if no recipe in progress, set power usage to the energy cost of the recipe
                     powerUsage = recipe.basePowerCost();

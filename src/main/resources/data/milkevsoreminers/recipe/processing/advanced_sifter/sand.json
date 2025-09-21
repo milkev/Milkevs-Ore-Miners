@@ -1,7 +1,10 @@
 {
-  "type": "milkevsoreminers:advancedsifter",
-  "input": "minecraft:sand",
-  "powerCost": 1000,
+  "type": "milkevsoreminers:advanced_sifter",
+  "input": {
+    "count": 1,
+    "id": "minecraft:sand"
+  },
+  "basePowerCost": 1000,
   "output": [
     "1;minecraft:dirt",
     "2;minecraft:glass"]
