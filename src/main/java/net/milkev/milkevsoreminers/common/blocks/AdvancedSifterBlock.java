@@ -4,10 +4,8 @@ import com.mojang.serialization.MapCodec;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
 import net.milkev.milkevsoreminers.common.blockEntities.AdvancedSifterBlockEntity;
 import net.milkev.milkevsoreminers.common.blockEntities.SifterBlockEntity;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
+import net.milkev.milkevsoreminers.common.recipes.AdvancedSifterRecipe;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -29,11 +27,12 @@ public class AdvancedSifterBlock extends BlockWithEntity implements BlockEntityP
         return null;
     }
 
-    public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
+    @Override
+    public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockHitResult blockHitResult) {
         if(world.isClient) {return ActionResult.SUCCESS;}
         AdvancedSifterBlockEntity advancedSifterBlockEntity = (AdvancedSifterBlockEntity) world.getBlockEntity(blockPos);
 
-        return advancedSifterBlockEntity.interact(blockState, world, blockPos, playerEntity, hand, blockHitResult);
+        return advancedSifterBlockEntity.interact(blockState, world, blockPos, playerEntity, playerEntity.getActiveHand(), blockHitResult);
     }
 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
@@ -44,11 +43,13 @@ public class AdvancedSifterBlock extends BlockWithEntity implements BlockEntityP
         };
     }
 
-    /*@Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return validateTicker(type, MilkevsOreMiners.SIFTER_BLOCK_ENTITY,
-                ((world1, blockPos, blockState, blockEntity) -> AdvancedSifterBlockEntity.tick(world1, blockPos, blockState, blockEntity)));
-    }*/
+    @Override
+    protected void onStateReplaced(BlockState blockState, World world, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        AdvancedSifterBlockEntity blockEntity = (AdvancedSifterBlockEntity) world.getBlockEntity(blockPos);
+        System.out.println(blockEntity.getItems());
+        blockEntity.getItems().iterator().forEachRemaining(stack -> Block.dropStack(world, blockPos, stack));
+        super.onStateReplaced(blockState, world, blockPos, blockState2, bl);
+    }
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {

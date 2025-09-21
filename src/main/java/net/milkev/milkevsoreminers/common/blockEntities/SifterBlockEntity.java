@@ -5,6 +5,7 @@ import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedInventory;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ItemEntity;
@@ -17,6 +18,7 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.RecipeManager;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.collection.DefaultedList;
@@ -32,9 +34,12 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
     private int progress = 0;
     //just holds item being processed, cannot be inserted/extracted from
     private final MilkevsAugmentedInventory inventory = MilkevsAugmentedInventory.ofSize(1);
+    //cache match getter as it improves performance by ~30%
+    RecipeManager.MatchGetter<MilkevsSingleRecipeInput.Single, SifterRecipe> cacheMatchGetter;
 
     public SifterBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.SIFTER_BLOCK_ENTITY, blockPos, blockState);
+        cacheMatchGetter = RecipeManager.createCachedMatchGetter(MilkevsOreMiners.SIFTER_RECIPE_TYPE);
     }
 
     public ActionResult interact(ItemStack itemStack, PlayerEntity playerEntity) {
@@ -56,7 +61,7 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
                 //finish sifter process and expel drops
                 ItemStack drop = getDrop();
                 if (drop != null) {
-                    dropItem(drop);
+                    Block.dropStack(world, this.pos.add(0, 1, 0), drop);
                 }
                 inventory.clear();
                 setProgress(0);
@@ -68,23 +73,17 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
 
     private boolean blockAllowedToBeSifted(ItemStack itemStack) {
         assert world != null;
-        Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(itemStack), world);
+        Optional<RecipeEntry<SifterRecipe>> matches = cacheMatchGetter.getFirstMatch(new MilkevsSingleRecipeInput.Single(itemStack), world);
         return matches.isPresent();
-    }
-    
-    private void dropItem(ItemStack itemStack) {
-        if(itemStack != null) {
-            world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY() + 1, pos.getZ(), itemStack));
-        }
     }
 
     private ItemStack getDrop() {
         ItemStack itemStack = inventory.getStack(0);
 
-        Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(itemStack), world);
+        Optional<RecipeEntry<SifterRecipe>> matches = cacheMatchGetter.getFirstMatch(new MilkevsSingleRecipeInput.Single(itemStack), world);
         
         if(matches.isPresent()) {
-            if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance() || matches.get().value().chance() == 100) {
+            if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance() || matches.get().value().chance() == 1) {
                 
                 return RecipeUtils.handleDrop(matches.get().value().output(), world);
             } else {

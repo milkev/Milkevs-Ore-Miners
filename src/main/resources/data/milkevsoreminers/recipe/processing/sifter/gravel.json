@@ -4,7 +4,7 @@
     "count": 1,
     "id": "minecraft:gravel"
   },
-  "chance": 1,
+  "chance": 1.0,
   "output": [
     "1;minecraft:diamond",
     "#milkevsoreminers:sifter;minecraft:sand"

@@ -4,7 +4,7 @@
     "count": 1,
     "id": "minecraft:sand"
   },
-  "chance": 1,
+  "chance": 1.0,
   "output": [
     "1;minecraft:dirt",
     "2;minecraft:glass",

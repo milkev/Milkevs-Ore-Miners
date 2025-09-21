@@ -8,6 +8,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -37,6 +38,14 @@ public class SifterBlock extends BlockWithEntity implements BlockEntityProvider 
         return sifterBlockEntity.interact(playerEntity.getStackInHand(playerEntity.getActiveHand()), playerEntity);
     }
 
+    @Override
+    protected void onStateReplaced(BlockState blockState, World world, BlockPos blockPos, BlockState blockState2, boolean bl) {
+        SifterBlockEntity sifterBlockEntity = (SifterBlockEntity) world.getBlockEntity(blockPos);
+        System.out.println(sifterBlockEntity.getItems());
+        sifterBlockEntity.getItems().iterator().forEachRemaining(stack -> Block.dropStack(world, blockPos, stack));
+        super.onStateReplaced(blockState, world, blockPos, blockState2, bl);
+    }
+    
     /*
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
