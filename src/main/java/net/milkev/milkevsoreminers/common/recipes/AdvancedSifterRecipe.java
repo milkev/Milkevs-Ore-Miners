@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float chance, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
+public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
     @Override
     public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
         return input().getItem().equals(recipeInput.get().getItem());
@@ -55,6 +55,7 @@ public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float cha
                 ItemStack.VALIDATED_CODEC.fieldOf("input").forGetter(AdvancedSifterRecipe::input),
                 Codec.INT.fieldOf("basePowerCost").forGetter(AdvancedSifterRecipe::basePowerCost),
                 Codec.FLOAT.fieldOf("chance").forGetter(AdvancedSifterRecipe::chance),
+                Codec.FLOAT.fieldOf("rolls").forGetter(AdvancedSifterRecipe::rolls),
                 Codec.list(Codec.STRING).fieldOf("output").forGetter(AdvancedSifterRecipe::output)
                 ).apply(inst, AdvancedSifterRecipe::new);});
         
@@ -62,6 +63,7 @@ public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float cha
                 ItemStack.PACKET_CODEC, AdvancedSifterRecipe::input,
                 PacketCodecs.INTEGER, AdvancedSifterRecipe::basePowerCost,
                 PacketCodecs.FLOAT, AdvancedSifterRecipe::chance,
+                PacketCodecs.FLOAT, AdvancedSifterRecipe::rolls,
                 PacketCodecs.STRING.collect(PacketCodecs.toList()), AdvancedSifterRecipe::output,
                 AdvancedSifterRecipe::new
         );

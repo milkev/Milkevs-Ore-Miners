@@ -6,6 +6,7 @@
   },
   "basePowerCost": 1000,
   "chance": 1.0,
+  "rolls": 1.0,
   "output": [
     "1;minecraft:dirt",
     "2;minecraft:glass"]

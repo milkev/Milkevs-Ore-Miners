@@ -1,0 +1,13 @@
+{
+  "type": "milkevsoreminers:sifter",
+  "input": {
+    "count": 1,
+    "id": "minecraft:dirt"
+  },
+  "chance": 0.33,
+  "rolls": 1.0,
+  "output": [
+    "1;minecraft:wheat_seeds",
+    "1;minecraft:oak_sapling"
+  ]
+}

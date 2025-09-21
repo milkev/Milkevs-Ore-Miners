@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public record SifterRecipe(ItemStack input, float chance, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
+public record SifterRecipe(ItemStack input, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
 
     @Override
     public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
@@ -55,12 +55,14 @@ public record SifterRecipe(ItemStack input, float chance, List<String> output) i
             return inst.group(
                 ItemStack.VALIDATED_CODEC.fieldOf("input").forGetter(SifterRecipe::input),
                 Codec.FLOAT.fieldOf("chance").forGetter(SifterRecipe::chance),
+                Codec.FLOAT.fieldOf("rolls").forGetter(SifterRecipe::rolls),
                 Codec.list(Codec.STRING).fieldOf("output").forGetter(SifterRecipe::output)
                 ).apply(inst, SifterRecipe::new);});
         
         public static final PacketCodec<RegistryByteBuf, SifterRecipe> PACKET_CODEC = PacketCodec.tuple(
                 ItemStack.PACKET_CODEC, SifterRecipe::input,
                 PacketCodecs.FLOAT, SifterRecipe::chance,
+                PacketCodecs.FLOAT, SifterRecipe::rolls,
                 PacketCodecs.STRING.collect(PacketCodecs.toList()), SifterRecipe::output,
                 SifterRecipe::new
         );

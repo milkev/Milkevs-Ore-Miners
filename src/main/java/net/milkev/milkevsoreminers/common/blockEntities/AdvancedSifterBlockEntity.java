@@ -12,6 +12,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -29,6 +30,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntityTicker<AdvancedSifterBlockEntity>, MilkevsAugmentedInventory, SidedInventory {
@@ -55,6 +59,7 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
     private final MilkevsAugmentedInventory inventory = MilkevsAugmentedInventory.of(DefaultedList.ofSize(10, ItemStack.EMPTY));
     //cache match getter as it improves performance by ~30%
     RecipeManager.MatchGetter<MilkevsSingleRecipeInput.Single, AdvancedSifterRecipe> cacheMatchGetter;
+    Map<Item, List<Item>> cacheOutputStackList = new HashMap<>();
 
     public AdvancedSifterBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.ADVANCED_SIFTER_BLOCK_ENTITY, blockPos, blockState);
@@ -79,7 +84,10 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
                     powerUsage -= use;
                     if (powerUsage <= 0) {
                         //System.out.println("Finishing a recipe");
-                        inventory.addStack(RecipeUtils.handleDrop(recipe.output(), world));
+                        if(!cacheOutputStackList.containsKey(recipe.input())) {
+                            cacheOutputStackList.put(recipe.input().getItem(), RecipeUtils.generateItemList(recipe.output(), world));
+                        }
+                        RecipeUtils.handleDrops(cacheOutputStackList.get(recipe.input().getItem()), recipe.rolls(), recipe.chance()).iterator().forEachRemaining(inventory::addStack);
                         inventory.removeStack(0, 1);
                         //once recipe is finished, set power usage to -666 to indicate the machine is ready to start another process
                         powerUsage = -666;
