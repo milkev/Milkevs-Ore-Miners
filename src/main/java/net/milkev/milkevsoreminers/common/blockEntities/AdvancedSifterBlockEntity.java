@@ -1,6 +1,9 @@
 package net.milkev.milkevsoreminers.common.blockEntities;
 
-import net.milkev.milkevsoreminers.common.recipes.advancedSifter.AdvancedSifterRecipe;
+import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.recipes.AdvancedSifterRecipe;
+import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
+import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedInventory;
 import net.minecraft.block.BlockState;
@@ -15,7 +18,6 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -57,27 +59,28 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
 
     @Override
     public void tick(World world, BlockPos blockPos, BlockState blockState, AdvancedSifterBlockEntity blockEntity) {
-        SingleStackRecipeInput recipeInput = new SingleStackRecipeInput(inventory.getStack(0));
-        Optional<RecipeEntry<AdvancedSifterRecipe>> match = world.getRecipeManager().getFirstMatch(AdvancedSifterRecipe.Type.INSTANCE, recipeInput, world);
-        if(match.isPresent()) {
-            //System.out.println("Match is present!");
-            AdvancedSifterRecipe recipe = match.get().value();
-            if(powerUsage == -666) {
-                //if no recipe in progress, set power usage to the energy cost of the recipe
-                powerUsage = recipe.getPowerCost();
-                powerCost = powerUsage;
-            }
-            if (energyStorage.hasEnoughEnergy(powerUsage) && !inventory.getStack(0).isEmpty()) {
-                energyStorage.consumeEnergy(getPowerUsageSpeed());
-                powerUsage -= getPowerUsageSpeed();
-                if (powerUsage <= 0) {
-                    //System.out.println("Finishing a recipe");
-                    inventory.addStack(recipe.getOutput());
-                    inventory.removeStack(0, 1);
-                    //once recipe is finished, set power usage to -666 to indicate the machine is ready to start another process
-                    powerUsage = -666;
+        if(!inventory.getStack(0).isEmpty()) {
+            Optional<RecipeEntry<AdvancedSifterRecipe>> match = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(inventory.getStack(0)), world);
+            if (match.isPresent()) {
+                //System.out.println("Match is present!");
+                AdvancedSifterRecipe recipe = match.get().value();
+                if (powerUsage == -666) {
+                    //if no recipe in progress, set power usage to the energy cost of the recipe
+                    powerUsage = recipe.basePowerCost();
+                    powerCost = powerUsage;
                 }
-                markDirty();
+                if (energyStorage.hasEnoughEnergy(powerUsage) && !inventory.getStack(0).isEmpty()) {
+                    energyStorage.consumeEnergy(getPowerUsageSpeed());
+                    powerUsage -= getPowerUsageSpeed();
+                    if (powerUsage <= 0) {
+                        //System.out.println("Finishing a recipe");
+                        inventory.addStack(RecipeUtils.handleDrop(recipe.output(), world));
+                        inventory.removeStack(0, 1);
+                        //once recipe is finished, set power usage to -666 to indicate the machine is ready to start another process
+                        powerUsage = -666;
+                    }
+                    markDirty();
+                }
             }
         }
     }

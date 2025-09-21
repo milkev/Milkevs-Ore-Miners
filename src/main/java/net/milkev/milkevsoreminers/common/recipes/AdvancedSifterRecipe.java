@@ -17,8 +17,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public record SifterRecipe(ItemStack input, float chance, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
-
+public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float chance, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
     @Override
     public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
         return input().getItem().equals(recipeInput.get().getItem());
@@ -41,39 +40,40 @@ public record SifterRecipe(ItemStack input, float chance, List<String> output) i
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return MilkevsOreMiners.SIFTER_RECIPE_SERIALIZER;
+        return MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_SERIALIZER;
     }
 
     @Override
     public RecipeType<?> getType() {
-        return MilkevsOreMiners.SIFTER_RECIPE_TYPE;
+        return MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_TYPE;
     }
     
-    public static class MyRecipeSerializer implements RecipeSerializer<SifterRecipe> {
+    public static class MyRecipeSerializer implements RecipeSerializer<AdvancedSifterRecipe> {
         
-        public static final MapCodec<SifterRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> {
+        public static final MapCodec<AdvancedSifterRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> {
             return inst.group(
-                ItemStack.VALIDATED_CODEC.fieldOf("input").forGetter(SifterRecipe::input),
-                Codec.FLOAT.fieldOf("chance").forGetter(SifterRecipe::chance),
-                Codec.list(Codec.STRING).fieldOf("output").forGetter(SifterRecipe::output)
-                ).apply(inst, SifterRecipe::new);});
+                ItemStack.VALIDATED_CODEC.fieldOf("input").forGetter(AdvancedSifterRecipe::input),
+                Codec.INT.fieldOf("basePowerCost").forGetter(AdvancedSifterRecipe::basePowerCost),
+                Codec.FLOAT.fieldOf("chance").forGetter(AdvancedSifterRecipe::chance),
+                Codec.list(Codec.STRING).fieldOf("output").forGetter(AdvancedSifterRecipe::output)
+                ).apply(inst, AdvancedSifterRecipe::new);});
         
-        public static final PacketCodec<RegistryByteBuf, SifterRecipe> PACKET_CODEC = PacketCodec.tuple(
-                ItemStack.PACKET_CODEC, SifterRecipe::input,
-                PacketCodecs.FLOAT, SifterRecipe::chance,
-                PacketCodecs.STRING.collect(PacketCodecs.toList()), SifterRecipe::output,
-                SifterRecipe::new
+        public static final PacketCodec<RegistryByteBuf, AdvancedSifterRecipe> PACKET_CODEC = PacketCodec.tuple(
+                ItemStack.PACKET_CODEC, AdvancedSifterRecipe::input,
+                PacketCodecs.INTEGER, AdvancedSifterRecipe::basePowerCost,
+                PacketCodecs.FLOAT, AdvancedSifterRecipe::chance,
+                PacketCodecs.STRING.collect(PacketCodecs.toList()), AdvancedSifterRecipe::output,
+                AdvancedSifterRecipe::new
         );
 
         @Override
-        public MapCodec<SifterRecipe> codec() {
+        public MapCodec<AdvancedSifterRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, SifterRecipe> packetCodec() {
+        public PacketCodec<RegistryByteBuf, AdvancedSifterRecipe> packetCodec() {
             return PACKET_CODEC;
         }
     }
-   
 }

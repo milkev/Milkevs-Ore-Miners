@@ -1,7 +1,7 @@
 package net.milkev.milkevsoreminers.common.blockEntities;
 
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.recipes.HandleDrop;
+import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedInventory;
@@ -12,21 +12,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.context.LootContextParameterSet;
-import net.minecraft.loot.context.LootContextType;
-import net.minecraft.loot.context.LootContextTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -54,7 +46,7 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
                     input.setCount(1);
                     inventory.setStack(0, input);
                     if(!playerEntity.isCreative()) {itemStack.decrement(1);}
-                    setProgress(10);
+                    setProgress(1);
                     return ActionResult.CONSUME;
                 }
             } else if (progress > 1) {
@@ -94,7 +86,7 @@ public class SifterBlockEntity extends BlockEntity implements MilkevsAugmentedIn
         if(matches.isPresent()) {
             if(((float) Random.create().nextBetween(0, 100))/100 < matches.get().value().chance() || matches.get().value().chance() == 100) {
                 
-                return HandleDrop.handleDrop(matches.get().value().output());
+                return RecipeUtils.handleDrop(matches.get().value().output(), world);
             } else {
                 return null;
             }
