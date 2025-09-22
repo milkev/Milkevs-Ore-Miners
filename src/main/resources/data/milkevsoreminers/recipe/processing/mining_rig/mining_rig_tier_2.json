@@ -1,5 +1,5 @@
 {
-  "type": "milkevsoreminers:miningrig_tier_2",
+  "type": "milkevsoreminers:mining_rig_tier_2",
   "powerCost": 1000,
   "powerUsageSpeed": 100,
   "output": [

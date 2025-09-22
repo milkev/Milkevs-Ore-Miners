@@ -1,15 +1,18 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.miningRig.MiningRigTier2Recipe;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public class MiningRigTier2BlockEntity extends MiningRigBaseBlockEntity {
     
@@ -24,7 +27,7 @@ public class MiningRigTier2BlockEntity extends MiningRigBaseBlockEntity {
         }
     };
     
-    MiningRigTier2Recipe recipe;
+    List<Item> output;
     
     public MiningRigTier2BlockEntity(BlockPos blockPos, BlockState blockState) {
         super(null, blockPos, blockState);
@@ -32,33 +35,41 @@ public class MiningRigTier2BlockEntity extends MiningRigBaseBlockEntity {
 
     @Override
     public void cacheRecipe(World world) {
-        if(this.recipe == null) {
-            //this.recipe = world.getRecipeManager().getFirstMatch(MiningRigTier2Recipe.Type.INSTANCE, new SimpleInventory(), world).get();
-            this.powerUsageSpeed = this.recipe.getPowerUsageSpeed();
+        if(this.output == null) {
+            //MiningRigTier2Recipe recipe = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.MINING_RIG_TIER_2_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(ItemStack.EMPTY), world).get().value();
+            //this.recipe = ;
+            //this.powerUsageSpeed = this.recipe.getPowerUsageSpeed();
         }
     }
 
     @Override
-    public ItemStack getRecipeOutput() {
-        return this.recipe.getOutput();
+    public List<Item> getRecipeOutput() {
+        return this.output;
     }
 
     @Override
-    public int getRecipePowerCost() {
-        return this.recipe.getPowerCost();
+    public int getPowerCost() {
+        return 1;/*this.recipe.getPowerCost();*/
+    }
+
+    @Override
+    public int getPowerUsageSpeed() {
+        return 0;
+    }
+
+    @Override
+    public float getRecipeChance() {
+        return 0;
+    }
+
+    @Override
+    public float getRecipeRolls() {
+        return 0;
     }
 
     @Override
     public MilkevsAugmentedEnergyStorage getEnergyStorage() {
         return this.energyStorage;
-    }
-
-    @Override
-    public void usePower() {
-        if(this.energyStorage.hasEnoughEnergy(getPowerUsageSpeed())) {
-            this.energyStorage.consumeEnergy(getPowerUsageSpeed());
-            this.powerUsage -= getPowerUsageSpeed();
-        }
     }
 
     @Override

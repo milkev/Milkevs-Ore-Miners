@@ -1,7 +1,8 @@
 {
-  "type": "milkevsoreminers:miningrig_tier_1",
+  "type": "milkevsoreminers:mining_rig_tier_1",
   "powerCost": 1000,
-  "powerUsageSpeed": 10,
+  "chance": 1.0,
+  "rolls": 1.0,
   "output": [
     "100;minecraft:raw_iron",
     "30;minecraft:raw_gold",

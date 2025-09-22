@@ -29,9 +29,6 @@ public class RecipeUtils {
         for(int i = 0; i < (int)rolls; i++) {
             if(chance(chance)) {
                 stacks.add(output.get(random.nextBetween(0, output.size() - 1)).getDefaultStack());
-                System.out.println("success");
-            } else {
-                System.out.println("fail");
             }
         }
         if(rolls % 1 > 0) {

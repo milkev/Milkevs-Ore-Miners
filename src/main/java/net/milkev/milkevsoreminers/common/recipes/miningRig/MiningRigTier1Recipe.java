@@ -1,7 +1,16 @@
 package net.milkev.milkevsoreminers.common.recipes.miningRig;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.RecipeType;
@@ -12,108 +21,65 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 
-public class MiningRigTier1Recipe implements Recipe<RecipeInput> {
+import java.util.List;
 
-    private final int powerCost;
-    private final int powerUsageSpeed;
-    private final ItemStack[] output;
-    private final int[] weight;
-    private final Identifier ID;
-
-    public MiningRigTier1Recipe(Identifier id, ItemStack[] output, int[] weight, int powerCost, int powerUsageSpeed) {
-        this.output = output;
-        this.weight = weight;
-        this.ID = id;
-        this.powerCost = powerCost;
-        this.powerUsageSpeed = powerUsageSpeed;
-    }
-    
-    public ItemStack getOutput() {
-
-        //creates an array of outputs that is the length of the total weight of all outputs
-        //each output will fill up an amount of slots in the array equal to the amount of weight it has
-        ItemStack[] outputs = new ItemStack[totalWeight()];
-
-        int j = -1; //tracks which output we are on
-        int k = 0; //tracks how much weight has been used
-        for(int i = 0; i < outputs.length; i++) {
-            while(k == 0) {
-                //everytime we reach 0 weight remaining for the current output,
-                //move onto the next output and set the weight tracker to the weight of the next output
-                //using while loop to skip all entries that may have a weight of 0
-                //entries may have a weight of 0 either from the recipe.json itself, or that the output item id did not link to a valid item.
-                j++;
-                k = getWeight(j);
-            }
-            outputs[i] = this.getOutput(j);
-            k--;
-        }
-
-        return outputs[Random.create().nextBetween(0, outputs.length-1)];
-    }
-
-    public ItemStack getOutput(int i) {
-        return this.output[i];
-    }
-
-    public int getNumofOutputs() {
-        return this.output.length;
-    }
-
-    public int getWeight(int i) {
-        return this.weight[i];
-    }
-
-    public int totalWeight() {
-        int total = 0;
-        for(int i = 0; i < this.output.length; i++) {
-            total+= this.weight[i];
-        }
-        return total;
-    }
-
-    public int getPowerCost() {
-        return this.powerCost;
-    }
-    
-    public int getPowerUsageSpeed() { return this.powerUsageSpeed; }
-
+public record MiningRigTier1Recipe(int powerCost, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
     @Override
-    public RecipeSerializer<?> getSerializer() {
-        return null;
-    }
-
-    public Identifier getId() {
-        return this.ID;
-    }
-
-    @Override
-    public boolean matches(RecipeInput recipeInput, World world) {
+    public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
         return true;
     }
 
     @Override
-    public ItemStack craft(RecipeInput recipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
-        return this.getOutput().copy();
+    public ItemStack craft(MilkevsSingleRecipeInput.Single recipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
+        return Items.CHEST.getDefaultStack();
     }
 
     @Override
     public boolean fits(int i, int j) {
-        return true;
+        return false;
     }
 
     @Override
     public ItemStack getResult(RegistryWrapper.WrapperLookup wrapperLookup) {
-        return null;
+        return Items.CHEST.getDefaultStack();
     }
 
-    public static class Type implements RecipeType<MiningRigTier1Recipe> {
-        private Type() {}
-        public static final RecipeType INSTANCE = new Type();
-        public static final String ID = "miningrig_tier_1";
+    public static class MyRecipeSerializer implements RecipeSerializer<MiningRigTier1Recipe> {
+
+        public static final MapCodec<MiningRigTier1Recipe> CODEC = RecordCodecBuilder.mapCodec(inst -> {
+            return inst.group(
+                    Codec.INT.fieldOf("powerCost").forGetter(MiningRigTier1Recipe::powerCost),
+                    Codec.FLOAT.fieldOf("chance").forGetter(MiningRigTier1Recipe::chance),
+                    Codec.FLOAT.fieldOf("rolls").forGetter(MiningRigTier1Recipe::rolls),
+                    Codec.list(Codec.STRING).fieldOf("output").forGetter(MiningRigTier1Recipe::output)
+            ).apply(inst, MiningRigTier1Recipe::new);
+        });
+
+        public static final PacketCodec<RegistryByteBuf, MiningRigTier1Recipe> PACKET_CODEC = PacketCodec.tuple(
+                PacketCodecs.INTEGER, MiningRigTier1Recipe::powerCost,
+                PacketCodecs.FLOAT, MiningRigTier1Recipe::chance,
+                PacketCodecs.FLOAT, MiningRigTier1Recipe::rolls,
+                PacketCodecs.STRING.collect(PacketCodecs.toList()), MiningRigTier1Recipe::output,
+                MiningRigTier1Recipe::new
+        );
+
+        @Override
+        public MapCodec<MiningRigTier1Recipe> codec() {
+            return CODEC;
+        }
+
+        @Override
+        public PacketCodec<RegistryByteBuf, MiningRigTier1Recipe> packetCodec() {
+            return PACKET_CODEC;
+        }
     }
     @Override
+    public RecipeSerializer<?> getSerializer() {
+        return MilkevsOreMiners.MINING_RIG_TIER_1_RECIPE_SERIALIZER;
+    }
+
+    @Override
     public RecipeType<?> getType() {
-        return Type.INSTANCE;
+        return MilkevsOreMiners.MINING_RIG_TIER_1_RECIPE_TYPE;
     }
 }
