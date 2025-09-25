@@ -1,18 +1,14 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
-import me.shedaniel.autoconfig.AutoConfig;
-import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.ModConfig;
 import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
-import net.milkev.milkevsoreminers.common.recipes.miningRig.MiningRigTier1Recipe;
+import net.milkev.milkevsoreminers.common.recipes.miningRig.BasicMiningRigRecipe;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +17,7 @@ import net.minecraft.world.World;
 import java.util.List;
 import java.util.Optional;
 
-public class MiningRigTier1BlockEntity extends MiningRigBaseBlockEntity{
+public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     
     public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000000, 50000000, 0) {
         @Override
@@ -39,16 +35,16 @@ public class MiningRigTier1BlockEntity extends MiningRigBaseBlockEntity{
     float rolls;
     int powerCost;
     
-    public MiningRigTier1BlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(MilkevsOreMiners.MINING_RIG_TIER_1_BLOCK_ENTITY, blockPos, blockState);
+    public BasicMiningRigBlockEntity(BlockPos blockPos, BlockState blockState) {
+        super(MilkevsOreMiners.BASIC_MINING_RIG_BLOCK_ENTITY, blockPos, blockState);
     }
 
     @Override
     public void cacheRecipe(World world) {
         if(this.output == null) {
-            Optional<RecipeEntry<MiningRigTier1Recipe>> match = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.MINING_RIG_TIER_1_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(Items.ACACIA_BOAT.getDefaultStack()), world);
+            Optional<RecipeEntry<BasicMiningRigRecipe>> match = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.BASIC_MINING_RIG_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(Items.ACACIA_BOAT.getDefaultStack()), world);
             if(match.isPresent()) {
-                MiningRigTier1Recipe recipe = match.get().value();
+                BasicMiningRigRecipe recipe = match.get().value();
                 this.output = RecipeUtils.generateItemList(recipe.output(), world);
                 this.chance = recipe.chance();
                 this.rolls = recipe.rolls();
@@ -89,10 +85,10 @@ public class MiningRigTier1BlockEntity extends MiningRigBaseBlockEntity{
 
     @Override
     protected Block[][][][] getStructureMatrixList() {
-        Block[] wall = new Block[]{Blocks.WHITE_CONCRETE}; //thse blocks are generic wall blocks that make up the majority of the structure
+        Block[] wall = new Block[]{MilkevsOreMiners.BASIC_MINING_RIG_WALL}; //thse blocks are generic wall blocks that make up the majority of the structure
         Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier does not have any upgrade slots.
-        Block[] controller = new Block[]{MilkevsOreMiners.MINING_RIG_TIER_1_BLOCK}; //this is the controller block, aka this block
-        Block[] io = new Block[]{Blocks.BARREL, Blocks.CHEST}; //these blocks are IO blocks, either storage or power. recommend having atleast 1 of each, but technically not required
+        Block[] controller = new Block[]{MilkevsOreMiners.BASIC_MINING_RIG_BLOCK}; //this is the controller block, aka this block
+        Block[] io = new Block[]{Blocks.BARREL, Blocks.CHEST}; //these blocks are IO blocks, either storage or power. to be replaced with having 1 of each required
         Block[] glass = new Block[]{Blocks.TINTED_GLASS}; //these blocks are the view windows
         Block[] requiredEmpty = new Block[]{Blocks.STRUCTURE_VOID}; //these blocks MUST be air
         Block[] beaminizer = new Block[]{Blocks.GRAY_CONCRETE}; //the block that "creates" the beam

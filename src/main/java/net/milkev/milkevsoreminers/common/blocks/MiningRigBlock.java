@@ -1,10 +1,8 @@
 package net.milkev.milkevsoreminers.common.blocks;
 
 import com.mojang.serialization.MapCodec;
-import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
 import net.milkev.milkevsoreminers.common.blockEntities.miningRig.MiningRigBaseBlockEntity;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.MiningRigTier1BlockEntity;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.MiningRigTier2BlockEntity;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.BasicMiningRigBlockEntity;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -14,7 +12,6 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -64,13 +61,13 @@ public class MiningRigBlock extends BlockWithEntity implements BlockEntityProvid
         
             return switch (tier) {
                 case 1 -> 
-                    new MiningRigTier1BlockEntity(blockPos, blockState);
+                    new BasicMiningRigBlockEntity(blockPos, blockState);
                 case 2 ->
-                    new MiningRigTier1BlockEntity(blockPos, blockState);
+                    new BasicMiningRigBlockEntity(blockPos, blockState);
                 case 3 ->
-                    new MiningRigTier1BlockEntity(blockPos, blockState);
+                    new BasicMiningRigBlockEntity(blockPos, blockState);
                 case 4 ->
-                    new MiningRigTier1BlockEntity(blockPos, blockState);
+                    new BasicMiningRigBlockEntity(blockPos, blockState);
                 default -> 
                     null;
             };
