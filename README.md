@@ -12,7 +12,7 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 
    -advanced sifter block (incomplete recipes)
 
-   -tier 1 mining rig (no texture, no gui, no special structure blocks, no upgrade blocks, no io blocks, incomplete recipes)
+   -tier 1 mining rig (no gui, no upgrade blocks, no io blocks, incomplete recipes)
 
 ## to do before release;
    
