@@ -46,15 +46,16 @@ public class SifterBlock extends BlockWithEntity implements BlockEntityProvider 
         super.onStateReplaced(blockState, world, blockPos, blockState2, bl);
     }
     
-    /*
     @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context) {
         return VoxelShapes.union(
-                VoxelShapes.cuboid(0f, 0.5f, 0f, 1f, 0.5f, 1.0f),
-                VoxelShapes.cuboid(0, 0, 0, 0.1f, 0.5f, 0.1f)
+                Block.createCuboidShape(14, 0 ,0, 16, 11, 2), //LNE
+                Block.createCuboidShape(0, 0, 14, 2, 11, 16), //LSW
+                Block.createCuboidShape(0, 0, 0, 2, 11 ,2), //LNW
+                Block.createCuboidShape(14, 0, 14, 16, 11, 16), //LSE
+                Block.createCuboidShape(0, 11, 0, 16 ,14, 16) //All Top
         );
     }
-     */
 
     @Override
     public BlockRenderType getRenderType(BlockState state) {
