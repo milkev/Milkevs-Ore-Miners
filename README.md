@@ -8,23 +8,21 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 
 ## whats currently included/functional in the unpublished beta;
 
-   -basic sifter block (no texture, incomplete recipes)
+   -basic sifter block (incomplete recipes)
 
-   -advanced sifter block (no texture, no gui, incomplete recipes)
+   -advanced sifter block (incomplete recipes)
 
    -tier 1 mining rig (no texture, no gui, no special structure blocks, no upgrade blocks, no io blocks, incomplete recipes)
 
 ## to do before release;
-
-   -implement advanced sifter
    
    -implement mining rigs T1-4
    
    -implement black hole extractors T1-3
    
-   -textures
+   -textures (Mining Rigs, BHE's)
    
-   -recipes
+   -recipes (Sifters, Mining Rigs, BHE's)
 
 
 ## to do after release;

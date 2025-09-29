@@ -31,8 +31,9 @@ public class AdvancedSifterBlock extends BlockWithEntity implements BlockEntityP
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockHitResult blockHitResult) {
         if(world.isClient) {return ActionResult.SUCCESS;}
         AdvancedSifterBlockEntity advancedSifterBlockEntity = (AdvancedSifterBlockEntity) world.getBlockEntity(blockPos);
-
-        return advancedSifterBlockEntity.interact(blockState, world, blockPos, playerEntity, playerEntity.getActiveHand(), blockHitResult);
+        advancedSifterBlockEntity.interact(blockState, world, blockPos, playerEntity, playerEntity.getActiveHand(), blockHitResult); //remove for release
+        playerEntity.openHandledScreen(advancedSifterBlockEntity);
+        return ActionResult.CONSUME;
     }
 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {

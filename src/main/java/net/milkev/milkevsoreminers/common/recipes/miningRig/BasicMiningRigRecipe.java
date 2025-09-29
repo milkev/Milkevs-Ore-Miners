@@ -70,11 +70,11 @@ public record BasicMiningRigRecipe(int powerCost, float chance, float rolls, Lis
     }
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return MilkevsOreMiners.BASIC_MINING_RIG_RECIPE_SERIALIZER;
+        return MilkevsOreMiners.MINING_RIG.BASIC.RECIPE_SERIALIZER;
     }
 
     @Override
     public RecipeType<?> getType() {
-        return MilkevsOreMiners.BASIC_MINING_RIG_RECIPE_TYPE;
+        return MilkevsOreMiners.MINING_RIG.BASIC.RECIPE_TYPE;
     }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "milkevsoreminers:block/miningrig/wall_2"
+    "all": "milkevsoreminers:block/miningrig/basic_wall"
   }
 }
