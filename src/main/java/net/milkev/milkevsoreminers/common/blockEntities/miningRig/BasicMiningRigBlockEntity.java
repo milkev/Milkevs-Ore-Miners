@@ -19,13 +19,6 @@ import java.util.Optional;
 
 public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     
-    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(MilkevsOreMiners.PowerCapacity.get("MRbasic"), MilkevsOreMiners.PowerCapacity.get("1"), 0) {
-        @Override
-        protected void onFinalCommit() {
-            markDirty();
-        }
-    };
-    
     List<Item> output;
     float chance;
     float rolls;
@@ -34,6 +27,7 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     
     public BasicMiningRigBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.MINING_RIG.BASIC.BLOCK_ENTITY, blockPos, blockState);
+        energyStorage.setCapacity(MilkevsOreMiners.PowerCapacity.get("MRbasic"));
     }
 
     @Override
@@ -77,16 +71,11 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     }
 
     @Override
-    public MilkevsAugmentedEnergyStorage getEnergyStorage() {
-        return this.energyStorage;
-    }
-
-    @Override
     protected Block[][][][] getStructureMatrixList() {
         Block[] wall = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.WALL}; //thse blocks are generic wall blocks that make up the majority of the structure
         Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier does not have any upgrade slots.
         Block[] controller = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.CONTROLLER}; //this is the controller block, aka this block
-        Block[] io = new Block[]{Blocks.BARREL, Blocks.CHEST}; //these blocks are IO blocks, either storage or power. to be replaced with having 1 of each required
+        Block[] io = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE}; //these blocks are IO blocks, either storage or power.
         Block[] glass = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.GLASS}; //these blocks are the view windows
         Block[] requiredEmpty = new Block[]{Blocks.STRUCTURE_VOID}; //these blocks MUST be air
         Block[] beaminizer = new Block[]{Blocks.GRAY_CONCRETE}; //the block that "creates" the beam

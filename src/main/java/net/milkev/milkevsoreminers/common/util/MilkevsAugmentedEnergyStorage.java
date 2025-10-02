@@ -9,15 +9,20 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     
     private long amount;
     private long capacity;
-    private long maxInsert;
-    private long maxExtract;
+    private float ioFactor;
+    private boolean insert;
+    private boolean extract;
     
-    public MilkevsAugmentedEnergyStorage(long capacity, long maxInsert, long maxExtract) {
+    public MilkevsAugmentedEnergyStorage(long capacity, long ioFactor, boolean insert, boolean extract) {
+        if(ioFactor > 1.01 || ioFactor < -0.01) {
+            throw new RuntimeException("ioFactor outside range! keep it between 0 and 1 please!");
+        }
         this.capacity = capacity;
-        this.maxInsert = maxInsert;
-        this.maxExtract = maxExtract;
+        this.ioFactor = ioFactor;
+        this.insert = insert;
+        this.extract = extract;
     }
-
+    
     public boolean hasEnoughEnergy(long amount) {
         if(this.amount >= amount) {
             return true;
@@ -39,7 +44,7 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     public long insert(long amount, TransactionContext transactionContext) {
         if(!this.supportsInsertion()) { return 0;}
         if(amount > 0) {
-            long inserted = Math.min(this.maxInsert, Math.min(amount, this.capacity - this.amount));
+            long inserted = Math.min(this.getIoRate(), Math.min(amount, this.capacity - this.amount));
             if(inserted > 0) {
                 this.updateSnapshots(transactionContext);
                 this.amount += inserted;
@@ -53,7 +58,7 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     public long extract(long amount, TransactionContext transactionContext) {
         if(!this.supportsExtraction()) { return 0;}
         if(amount > 0) {
-            long inserted = Math.min(this.maxExtract, Math.min(amount, this.capacity));
+            long inserted = Math.min(this.getIoRate(), Math.min(amount, this.capacity));
             if(inserted > 0) {
                 this.updateSnapshots(transactionContext);
                 this.amount -= inserted;
@@ -73,12 +78,12 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     
     @Override
     public boolean supportsInsertion() {
-        return this.maxInsert > 0;
+        return this.insert;
     }
 
     @Override
     public boolean supportsExtraction() {
-        return this.maxExtract > 0;
+        return this.extract;
     }
 
     @Override
@@ -89,6 +94,17 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     @Override
     public long getCapacity() {
         return this.capacity;
+    }
+    
+    public long getIoRate() {
+        return (long) (this.ioFactor * this.capacity);
+    }
+    
+    public void setCapacity(long newCapacity) {
+        this.capacity = newCapacity;
+        if(this.amount > newCapacity) {
+            this.amount = newCapacity;
+        }
     }
     
     //hard set amount, just implemented for reading from nbt data

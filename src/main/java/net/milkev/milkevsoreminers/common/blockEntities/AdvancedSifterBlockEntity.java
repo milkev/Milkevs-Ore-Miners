@@ -49,7 +49,7 @@ import java.util.Optional;
 public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntityTicker<AdvancedSifterBlockEntity>, MilkevsAugmentedInventory, SidedInventory, ExtendedScreenHandlerFactory<BlockPosPayload> {
 
 
-    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(MilkevsOreMiners.PowerCapacity.get("sifter"), 50000, 0) {
+    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(10000, 1, true, false) {
         @Override
         protected void onFinalCommit() {
             markDirty();
@@ -78,6 +78,7 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
     public AdvancedSifterBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.ADVANCED_SIFTER_BLOCK_ENTITY, blockPos, blockState);
         cacheMatchGetter = RecipeManager.createCachedMatchGetter(MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_TYPE);
+        energyStorage.setCapacity(MilkevsOreMiners.PowerCapacity.get("sifter"));
     }
 
     @Override

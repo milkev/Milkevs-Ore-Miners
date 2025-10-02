@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
+import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.minecraft.block.Block;
@@ -30,9 +31,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
-
+    
+    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000, 1, true, false) {
+        @Override
+        protected void onFinalCommit() {
+            markDirty();
+        }
+    };
     //tracks how much power has been used in the current operation (counts down from the energy cost of the recipe)
     //power usage is set from recipes!
     long powerUsage = -666;
@@ -51,23 +59,23 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
     public abstract long getPowerUsageSpeed();
     public abstract float getRecipeChance();
     public abstract float getRecipeRolls();
-    public abstract MilkevsAugmentedEnergyStorage getEnergyStorage();
 
     @Override
     public void tick(World world, BlockPos blockPos, BlockState blockState, MultiBlockEntity blockEntity) {
-        //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot.
+        //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot and /reload is basically not an option if you have more than a small handful of mods anyway
         cacheRecipe(world);
+        //add timer to periodically check validity of structure
         if(isStructureValid()) {
             if(laserHasLOS) {
                 usePower();
                 if (powerUsage <= 0) {
-                    boolean hit = false;
-                    Iterator<Map.Entry<BlockPos, Block>> iterator = getBlocksInStructure().entrySet().iterator();
-                    while (iterator.hasNext() && !hit) {
-                        Map.Entry<BlockPos, Block> entry = iterator.next();
+                    Optional<Map.Entry<BlockPos, Block>> test = findFirstBlock(MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE);
+                    if(test.isPresent()) {
+                        Map.Entry<BlockPos, Block> entry = test.get();
                         Block blockStructure = entry.getValue();
                         BlockPos blockPosStructure = entry.getKey();
-                        if (blockStructure == Blocks.BARREL) {
+                        if (blockStructure == MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE) {
+                            //replace with not-pointless-transaction method to be built into IO_STORAGE block
                             Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(getWorld(), blockPosStructure, Direction.DOWN);
                             if (itemStorage != null) {
                                 try (Transaction transaction = Transaction.openOuter()) {
@@ -78,7 +86,6 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
                                     }
                                     //System.out.println("commit transaction!");
                                     transaction.commit();
-                                    hit = true;
                                     powerUsage = getPowerCost();
                                 }
                             }
@@ -86,7 +93,8 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
                     }
                 }
             } else {
-            laserHasLOS = checkLaserLOS();
+                laserHasLOS = checkLaserLOS();
+                markDirty();
             }
         } else {
             validateStructure();
@@ -94,16 +102,12 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
     }
     
     private boolean checkLaserLOS() {
-        markDirty();
-        BlockPos laserPos = null;
-        for(Map.Entry<BlockPos, Block> entry : this.getBlocksInStructure().entrySet()) {
-            if(entry.getValue() == Blocks.GRAY_CONCRETE) {
-                laserPos = entry.getKey();
-            }
-        }
-        if(laserPos == null) {
+        Optional<Map.Entry<BlockPos, Block>> test = findFirstBlock(Blocks.GRAY_CONCRETE);
+        if(test.isEmpty()) {
+            //System.out.println("couldnt find laser block");
             return false;
         }
+        BlockPos laserPos = test.get().getKey();
         for(int i = -1; i >= world.getBottomY() + Math.abs(laserPos.getY()); i--) {
             //System.out.println("Checked: " + laserPos.add(0, i, 0).getY());
             if(world.getBlockState(laserPos.add(0, i, 0)).getBlock() == Blocks.BEDROCK) {
@@ -116,9 +120,13 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
         return true;
     }
     
+    public MilkevsAugmentedEnergyStorage getEnergyStorage() {
+        return this.energyStorage;
+    }
+    
     public void usePower() {
         if(this.getEnergyStorage().hasEnoughEnergy(getPowerUsageSpeed())) {
-            long use = getPowerUsageSpeed();
+            long use = this.getPowerUsageSpeed();
             if(this.getEnergyStorage().useExactly(use)) {
                 this.powerUsage -= use;
             }
@@ -140,7 +148,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity {
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        powerUsage = nbt.getLong("progress");
+        powerUsage = nbt.getLong("powerUsage");
         getEnergyStorage().setAmount(nbt.getLong("energy"));
         laserHasLOS = nbt.getBoolean("laserlos");
         progress = nbt.getFloat("progress");

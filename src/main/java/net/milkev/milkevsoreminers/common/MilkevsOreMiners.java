@@ -84,7 +84,7 @@ public class MilkevsOreMiners implements ModInitializer {
 			public static final Block GLASS = new TintedGlassBlock(AbstractBlock.Settings.create().nonOpaque().strength(50));
 			//replace io with custom block
 			//should have: dynamic inventory size for different tiers, auto-push inventory option, io-storage, io-power, io-combined
-			public static final Block IO = new BarrelBlock(AbstractBlock.Settings.create().strength(50));
+			public static final Block IO_STORAGE = new BarrelBlock(AbstractBlock.Settings.create().strength(50));
 		}
 	/*
 	//Advanced Mining Rig
@@ -136,7 +136,7 @@ public class MilkevsOreMiners implements ModInitializer {
 		EnergyStorage.SIDED.registerForBlockEntity((MiningRigTier1BlockEntity, direction) -> MiningRigTier1BlockEntity.energyStorage, MINING_RIG.BASIC.BLOCK_ENTITY);
 		RegisterBlockItem("basic_mining_rig_wall", MINING_RIG.BASIC.WALL, Rarity.RARE, ItemGroups.TOOLS);
 		RegisterBlockItem("basic_mining_rig_glass", MINING_RIG.BASIC.GLASS, Rarity.RARE, ItemGroups.TOOLS);
-		RegisterBlockItem("basic_mining_rig_io", MINING_RIG.BASIC.IO, Rarity.RARE, ItemGroups.TOOLS);
+		RegisterBlockItem("basic_io_storage", MINING_RIG.BASIC.IO_STORAGE, Rarity.RARE, ItemGroups.TOOLS);
 		/*
 		//advanced mining rig
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("mining_rig_tier_2_block_entity"), MINING_RIG_TIER_2_BLOCK_ENTITY);

@@ -39,7 +39,9 @@ dependencies {
 	include modApi("teamreborn:energy:${project.techreborn_version}") {
 		transitive = false
 	}
-	modImplementation "net.milkev:milkevsmultiblocklibrary:${project.milkevsmultiblocklibrary_version}"
+	modImplementation("net.milkev:milkevsmultiblocklibrary:${project.milkevsmultiblocklibrary_version}") {
+		changing = true
+	}
 }
 
 processResources {

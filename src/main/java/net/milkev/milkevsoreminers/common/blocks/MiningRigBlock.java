@@ -10,10 +10,12 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,10 +43,11 @@ public class MiningRigBlock extends BlockWithEntity implements BlockEntityProvid
         //id love to move this to the multiblock library, but unfortunately im pretty sure its impossible to do just from the block entity
         if(playerEntity.getStackInHand(playerEntity.getActiveHand()).getItem() != MilkevsMultiBlockLibrary.MULTIBLOCK_BUILDER
                 && !playerEntity.isSneaking()) {
-            playerEntity.sendMessage(MilkevsOreMiners.makeTranslation("notification.incomplete_structure"));
+            playerEntity.sendMessage(MilkevsOreMiners.makeTranslation("notification.incomplete_structure"), true);
             return ActionResult.CONSUME;
         }
-
+        
+        //this call base multiblockentity which is needed for logic to enable/disable preview
         return miningRigBlockEntity.interact(blockState, world, blockPos, playerEntity, blockHitResult);
     }
 
@@ -72,18 +75,36 @@ public class MiningRigBlock extends BlockWithEntity implements BlockEntityProvid
     @Nullable
     @Override
     public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
+        MiningRigBaseBlockEntity baseBlockEntity = null;
+        switch (tier) {
+            case 1 -> 
+                    baseBlockEntity = new BasicMiningRigBlockEntity(blockPos, blockState);
+            case 2 ->
+                    baseBlockEntity = new BasicMiningRigBlockEntity(blockPos, blockState);
+            case 3 ->
+                    baseBlockEntity = new BasicMiningRigBlockEntity(blockPos, blockState);
+            case 4 -> 
+                    baseBlockEntity = new BasicMiningRigBlockEntity(blockPos, blockState);
+        };
         
-            return switch (tier) {
-                case 1 -> 
-                    new BasicMiningRigBlockEntity(blockPos, blockState);
-                case 2 ->
-                    new BasicMiningRigBlockEntity(blockPos, blockState);
-                case 3 ->
-                    new BasicMiningRigBlockEntity(blockPos, blockState);
-                case 4 ->
-                    new BasicMiningRigBlockEntity(blockPos, blockState);
-                default -> 
-                    null;
-            };
+        //because i dont feel like implementing a directional block when the block entity is whats directional
+        //might make a version of the multiblockentity in the library mod that relies on a directional block for its build direction though? im fine with this for now though
+        if(baseBlockEntity != null) {
+        if(startDir == Direction.SOUTH || startDir == Direction.NORTH) {
+            baseBlockEntity.setDirection(startDir.rotateYClockwise());
+        } else if(startDir == Direction.EAST || startDir == Direction.WEST) {
+            baseBlockEntity.setDirection(startDir.rotateYCounterclockwise());
+        }
+        }
+        
+        return baseBlockEntity;
+    }
+    
+    Direction startDir;
+    
+    @Override
+	public BlockState getPlacementState(ItemPlacementContext ctx) {
+        startDir = ctx.getHorizontalPlayerFacing().getOpposite();
+        return super.getPlacementState(ctx);
     }
 }

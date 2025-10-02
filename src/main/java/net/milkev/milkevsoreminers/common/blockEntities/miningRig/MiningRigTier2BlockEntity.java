@@ -16,7 +16,7 @@ import java.util.List;
 
 public class MiningRigTier2BlockEntity extends MiningRigBaseBlockEntity {
     
-    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000000, 50000000, 0) {
+    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000000, 1, true, false) {
         @Override
         protected void onFinalCommit() {
             markDirty();
