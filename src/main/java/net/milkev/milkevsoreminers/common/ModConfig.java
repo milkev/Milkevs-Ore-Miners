@@ -6,14 +6,14 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name="milkevsoreminers")
 public class ModConfig implements ConfigData {
-    @Comment("Amount of energy used by the Advanced Sifter per tick. Default: ?")
-    int advancedSifterPowerUse = 50;
-    @Comment("Amount of energy used by the Tier 1 Mining Rig per tick. Default: ?")
-    int tier1MiningRigPowerUse = 500;
-    @Comment("Amount of energy used by the Tier 2 Mining Rig per tick. Default: ?")
-    int tier2MiningRigPowerUse = 1500;
-    @Comment("Amount of energy used by the Tier 3 Mining Rig per tick. Default: ?")
-    int tier3MiningRigPowerUse = 3000;
-    @Comment("Amount of energy used by the Tier 4 Mining Rig per tick. Default: ?")
-    int tier4MiningRigPowerUse = 9000;
+    @Comment("Energy capacity of the advanced sifter. Default: ?")
+    long advancedSifterPowerCapacity = 10000;
+    @Comment("Energy capacity of the basic mining rig. Default: ?")
+    long basicMiningRigPowerCapacity = 50000;
+    @Comment("Energy capacity of the advanced mining rig. Default: ?")
+    long advancedMiningRigPowerCapacity = 250000;
+    @Comment("Energy capacity of the elite mining rig. Default: ?")
+    long eliteMiningRigPowerCapacity = 1000000;
+    @Comment("Energy capacity of the ultimate mining rig. Default: ?")
+    long ultimateMiningRigPowerCapacity = 25000000;
 }

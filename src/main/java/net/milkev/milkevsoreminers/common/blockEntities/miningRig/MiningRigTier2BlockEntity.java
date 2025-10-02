@@ -48,12 +48,12 @@ public class MiningRigTier2BlockEntity extends MiningRigBaseBlockEntity {
     }
 
     @Override
-    public int getPowerCost() {
+    public long getPowerCost() {
         return 1;/*this.recipe.getPowerCost();*/
     }
 
     @Override
-    public int getPowerUsageSpeed() {
+    public long getPowerUsageSpeed() {
         return 0;
     }
 

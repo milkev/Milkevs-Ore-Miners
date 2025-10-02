@@ -26,12 +26,14 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeManager;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -47,7 +49,7 @@ import java.util.Optional;
 public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntityTicker<AdvancedSifterBlockEntity>, MilkevsAugmentedInventory, SidedInventory, ExtendedScreenHandlerFactory<BlockPosPayload> {
 
 
-    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000, 50000, 0) {
+    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(MilkevsOreMiners.PowerCapacity.get("sifter"), 50000, 0) {
         @Override
         protected void onFinalCommit() {
             markDirty();
@@ -58,17 +60,20 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
         }
     };
 
-    //base speed is set from config *eventually*
-    int powerUsageSpeed = 5;
+    //base speed is set from recipe
+    long powerUsageSpeed = 0;
     //tracks how much power has been used in the current operation (counts down from the energy cost of the recipe)
-    int powerUsage = -666;
+    long progress = 0;
     //tracks the total cost of the recipe being processed for use in the gui
-    int powerCost = 0;
+    long powerCost = 0;
     //slot 0 is the only slot that can be inserted to, and cant be extracted from, as this is the input slot. the other 12 slots are the output slots, which cannot be inserted to, but can be extracted from
     private final MilkevsAugmentedInventory inventory = MilkevsAugmentedInventory.of(DefaultedList.ofSize(13, ItemStack.EMPTY));
     //cache match getter as it improves performance by ~30%
     RecipeManager.MatchGetter<MilkevsSingleRecipeInput.Single, AdvancedSifterRecipe> cacheMatchGetter;
+    //didnt test performance improvements here but since its an expensive function to build the output, its probably a pretty good improvement as well
     Map<Item, List<Item>> cacheOutputStackList = new HashMap<>();
+    //if this is EMPTY then there is no recipe in progress
+    Item activeRecipe = ItemStack.EMPTY.getItem();
 
     public AdvancedSifterBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.ADVANCED_SIFTER_BLOCK_ENTITY, blockPos, blockState);
@@ -83,30 +88,40 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
                 if (match.isPresent()) {
                     //System.out.println("Match is present!");
                     AdvancedSifterRecipe recipe = match.get().value();
-                    if (powerUsage == -666) {
+                    if (activeRecipe == ItemStack.EMPTY.getItem()) {
                         //if no recipe in progress, set power usage to the energy cost of the recipe
-                        powerUsage = recipe.basePowerCost();
-                        powerCost = powerUsage;
+                        progress = recipe.powerCost();
+                        powerCost = progress;
+                        activeRecipe = recipe.input().getItem();
+                        powerUsageSpeed = recipe.basePowerConsumption();
                         markDirty();
                         world.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
                     }
-                    if (energyStorage.hasEnoughEnergy(powerUsage) && !inventory.getStack(0).isEmpty()) {
-                        int use = getPowerUsageSpeed();
-                        energyStorage.consumeEnergy(use);
-                        powerUsage -= use;
-                        if (powerUsage <= 0) {
-                            //System.out.println("Finishing a recipe");
-                            if (!cacheOutputStackList.containsKey(recipe.input())) {
-                                cacheOutputStackList.put(recipe.input().getItem(), RecipeUtils.generateItemList(recipe.output(), world));
+                    if (energyStorage.hasEnoughEnergy(progress)) {
+                        //System.out.println("Enough Energy!");
+                        if(activeRecipe != recipe.input().getItem()) {
+                            //if input item has changed, reset recipe progress and active recipe
+                            activeRecipe = ItemStack.EMPTY.getItem();
+                        } else {
+                            long use = getPowerUsageSpeed();
+                            if(energyStorage.useExactly(use)) {
+                                progress -= use;
                             }
-                            RecipeUtils.handleDrops(cacheOutputStackList.get(recipe.input().getItem()), recipe.rolls(), recipe.chance()).iterator().forEachRemaining(inventory::addStack);
-                            inventory.removeStack(0, 1);
-                            //once recipe is finished, set power usage to -666 to indicate the machine is ready to start another process
-                            powerUsage = -666;
-                            powerCost = 0;
+                            if (progress <= 0) {
+                                if (!cacheOutputStackList.containsKey(recipe.input().getItem())) {
+                                    cacheOutputStackList.put(recipe.input().getItem(), RecipeUtils.generateItemList(recipe.output(), world));
+                                }
+                                RecipeUtils.handleDrops(cacheOutputStackList.get(recipe.input().getItem()), recipe.rolls(), recipe.chance())
+                                        .iterator().forEachRemaining(inventory::addStack);
+                                inventory.removeStack(0, 1);
+                                if(inventory.getStack(0).getItem() != activeRecipe) {
+                                    activeRecipe = ItemStack.EMPTY.getItem();
+                                    powerCost = 0;
+                                }
+                            }
+                            markDirty();
+                            world.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
                         }
-                        markDirty();
-                        world.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
                     }
                 }
             }
@@ -116,31 +131,32 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
     //remove for release
     //just in for testing purposes
     public ActionResult interact(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, Hand hand, BlockHitResult blockHitResult) {
-        energyStorage.amount += 500;
-                        markDirty();
-                        world.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
-        return ActionResult.FAIL;
+        energyStorage.setAmount(1000 + energyStorage.getAmount());
+        markDirty();
+        world.updateListeners(blockPos, blockState, blockState, Block.NOTIFY_ALL);
+        return ActionResult.CONSUME;
     }
 
     //would also contain logic for upgrades if i decide to add them for the sifter
     //for now just makes sure recipes dont use more power than specified
-    public int getPowerUsageSpeed() {
-        if(powerUsage < powerUsageSpeed) {
-            return powerUsage;
+    public long getPowerUsageSpeed() {
+        if(progress < powerUsageSpeed) {
+            return progress;
         }
         return powerUsageSpeed;
     }
     
     public float getProgress() {
-        return this.powerUsage <= 0 ? 0 : (float) (this.powerCost - this.powerUsage)/ (float) this.powerCost;
+        return this.progress <= 0 ? 0 : (float) (this.powerCost - this.progress)/ (float) this.powerCost;
     }
 
     @Override
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
 
-        nbt.putInt("progress", powerUsage);
-        nbt.putInt("cost", powerCost);
-        nbt.putLong("energy", energyStorage.amount);
+        nbt.putLong("progress", progress);
+        nbt.putLong("cost", powerCost);
+        nbt.putLong("energy", energyStorage.getAmount());
+        nbt.putString("activerecipe", activeRecipe.toString());
         Inventories.writeNbt(nbt, inventory.getItems(), registries);
 
         super.writeNbt(nbt, registries);
@@ -150,9 +166,10 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
     public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
 
-        powerUsage = nbt.getInt("progress");
-        powerCost = nbt.getInt("cost");
-        energyStorage.amount = nbt.getLong("energy");
+                                           progress = nbt.getInt("progress");
+                                          powerCost = nbt.getInt("cost");
+                             energyStorage.setAmount(nbt.getLong("energy"));
+        activeRecipe = Registries.ITEM.get(Identifier.of(nbt.getString("activerecipe")));
         Inventories.readNbt(nbt, inventory.getItems(), registries);
 
     }
@@ -206,7 +223,7 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
         return new BlockPosPayload(this.pos);
     }
 
-    private static final Text displayName = Text.translatable(MilkevsOreMiners.makeTranslation("container.advanced_sifter"));
+    private static final Text displayName = MilkevsOreMiners.makeTranslation("container.advanced_sifter");
     
     @Override
     public Text getDisplayName() {

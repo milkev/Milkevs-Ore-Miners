@@ -33,12 +33,16 @@ public class MiningRigBlock extends BlockWithEntity implements BlockEntityProvid
         if(world.isClient) {return ActionResult.SUCCESS;}
         MiningRigBaseBlockEntity miningRigBlockEntity = (MiningRigBaseBlockEntity) world.getBlockEntity(blockPos);
         if(miningRigBlockEntity.isStructureValid()) {
+            miningRigBlockEntity.getEnergyStorage().setAmount(1000 + miningRigBlockEntity.getEnergyStorage().getAmount());
+            //insert case for tier
             playerEntity.openHandledScreen(null);
             return ActionResult.CONSUME;
         }
+        //id love to move this to the multiblock library, but unfortunately im pretty sure its impossible to do just from the block entity
         if(playerEntity.getStackInHand(playerEntity.getActiveHand()).getItem() != MilkevsMultiBlockLibrary.MULTIBLOCK_BUILDER
                 && !playerEntity.isSneaking()) {
-            playerEntity.sendMessage(Text.translatable(MilkevsOreMiners.makeTranslation("notification.incomplete_structure")));
+            playerEntity.sendMessage(MilkevsOreMiners.makeTranslation("notification.incomplete_structure"));
+            return ActionResult.CONSUME;
         }
 
         return miningRigBlockEntity.interact(blockState, world, blockPos, playerEntity, blockHitResult);

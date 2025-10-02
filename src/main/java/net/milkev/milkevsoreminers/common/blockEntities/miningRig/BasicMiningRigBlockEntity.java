@@ -19,21 +19,18 @@ import java.util.Optional;
 
 public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     
-    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000000, 50000000, 0) {
+    public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(MilkevsOreMiners.PowerCapacity.get("MRbasic"), MilkevsOreMiners.PowerCapacity.get("1"), 0) {
         @Override
         protected void onFinalCommit() {
             markDirty();
-        }
-        @Override
-        public boolean supportsExtraction() {
-            return false;
         }
     };
     
     List<Item> output;
     float chance;
     float rolls;
-    int powerCost;
+    long powerCost;
+    long basePowerConsumption;
     
     public BasicMiningRigBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.MINING_RIG.BASIC.BLOCK_ENTITY, blockPos, blockState);
@@ -49,6 +46,7 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
                 this.chance = recipe.chance();
                 this.rolls = recipe.rolls();
                 this.powerCost = recipe.powerCost();
+                this.basePowerConsumption = recipe.basePowerConsumption();
             }
         }
     }
@@ -59,13 +57,13 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     }
 
     @Override
-    public int getPowerCost() {
+    public long getPowerCost() {
         return this.powerCost;
     }
 
     @Override
-    public int getPowerUsageSpeed() {
-        return MilkevsOreMiners.miningRigPowerUse.getOrDefault("1", 500);
+    public long getPowerUsageSpeed() {
+        return basePowerConsumption;
     }
 
     @Override

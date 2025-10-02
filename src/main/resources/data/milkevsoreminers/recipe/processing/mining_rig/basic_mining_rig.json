@@ -1,6 +1,7 @@
 {
   "type": "milkevsoreminers:basic_mining_rig",
-  "powerCost": 1000,
+  "powerCost": 1500,
+  "basePowerConsumption": 50,
   "chance": 1.0,
   "rolls": 1.0,
   "output": [

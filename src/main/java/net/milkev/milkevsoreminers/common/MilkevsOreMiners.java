@@ -34,6 +34,7 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import team.reborn.energy.api.EnergyStorage;
@@ -81,6 +82,8 @@ public class MilkevsOreMiners implements ModInitializer {
 			};
 			public static final Block WALL = new Block(AbstractBlock.Settings.create().strength(50));
 			public static final Block GLASS = new TintedGlassBlock(AbstractBlock.Settings.create().nonOpaque().strength(50));
+			//replace io with custom block
+			//should have: dynamic inventory size for different tiers, auto-push inventory option, io-storage, io-power, io-combined
 			public static final Block IO = new BarrelBlock(AbstractBlock.Settings.create().strength(50));
 		}
 	/*
@@ -99,7 +102,7 @@ public class MilkevsOreMiners implements ModInitializer {
 	}
 	
 	public static ModConfig config;
-	public static Map<String, Integer> miningRigPowerUse = new HashMap<>();
+	public static Map<String, Long> PowerCapacity = new HashMap<>();
 
 	@Override
 	public void onInitialize() {
@@ -107,10 +110,11 @@ public class MilkevsOreMiners implements ModInitializer {
 		AutoConfig.register(ModConfig.class, JanksonConfigSerializer::new);
 		config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
 		//idk, cloth config isnt letting me access any of the configs anywhere except in here so... if anyone knows a fix make a pull request or issue?
-		miningRigPowerUse.put("1", config.tier1MiningRigPowerUse);
-		miningRigPowerUse.put("2", config.tier2MiningRigPowerUse);
-		miningRigPowerUse.put("3", config.tier3MiningRigPowerUse);
-		miningRigPowerUse.put("4", config.tier4MiningRigPowerUse);
+		PowerCapacity.put("sifter", config.advancedSifterPowerCapacity);
+		PowerCapacity.put("MRbasic", config.basicMiningRigPowerCapacity);
+		PowerCapacity.put("MRadvanced", config.advancedMiningRigPowerCapacity);
+		PowerCapacity.put("MRelite", config.eliteMiningRigPowerCapacity);
+		PowerCapacity.put("MRultimate", config.ultimateMiningRigPowerCapacity);
 		
 		//sifter
 		RegisterBlockItem("sifter", SIFTER_BLOCK, Rarity.UNCOMMON, ItemGroups.TOOLS);
@@ -162,25 +166,6 @@ public class MilkevsOreMiners implements ModInitializer {
 		Registry.register(Registries.BLOCK, id(ID), block);
 		RegisterItem(ID, new BlockItem(block, new Item.Settings().rarity(rarity)), group);
 	}
-	
-	public void RegisterColoredBlock(String ID, Block block, Rarity rarity, RegistryKey<ItemGroup> group) {
-		RegisterBlockItem(ID + "_white", block, rarity, group);
-		RegisterBlockItem(ID + "_brown", block, rarity, group);
-		RegisterBlockItem(ID + "_black", block, rarity, group);
-		RegisterBlockItem(ID + "_blue", block, rarity, group);
-		RegisterBlockItem(ID + "_cyan", block, rarity, group);
-		RegisterBlockItem(ID + "_gray", block, rarity, group);
-		RegisterBlockItem(ID + "_green", block, rarity, group);
-		RegisterBlockItem(ID + "_light_blue", block, rarity, group);
-		RegisterBlockItem(ID + "_light_gray", block, rarity, group);
-		RegisterBlockItem(ID + "_lime", block, rarity, group);
-		RegisterBlockItem(ID + "_magenta", block, rarity, group);
-		RegisterBlockItem(ID + "_orange", block, rarity, group);
-		RegisterBlockItem(ID + "_pink", block, rarity, group);
-		RegisterBlockItem(ID + "_purple", block, rarity, group);
-		RegisterBlockItem(ID + "_red", block, rarity, group);
-		RegisterBlockItem(ID + "_yellow", block, rarity, group);
-	}
 
 	public void AddToGroup(RegistryKey<ItemGroup> group, ItemConvertible item) {
 		ItemGroupEvents.modifyEntriesEvent(group).register(content -> {
@@ -192,8 +177,8 @@ public class MilkevsOreMiners implements ModInitializer {
         return Registry.register(Registries.RECIPE_TYPE, id(string), recipeType);
     }
 	
-	public static String makeTranslation(String string) {
-		return MOD_ID + "." + string;
+	public static MutableText makeTranslation(String string) {
+		return net.minecraft.text.Text.translatable(MOD_ID + "." + string);
 	}
 	
 	public static <T extends ScreenHandler, D extends CustomPayload> ExtendedScreenHandlerType<T, D> registerScreen(String name, ExtendedScreenHandlerType.ExtendedFactory<T, D> factory, PacketCodec<? super RegistryByteBuf, D> codec) {

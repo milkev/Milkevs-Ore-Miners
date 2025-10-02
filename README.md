@@ -20,7 +20,7 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
    
    -implement black hole extractors T1-3
    
-   -textures (Mining Rigs, BHE's)
+   -textures (Mining Rigs, BHE's, GUI Power bars)
    
    -recipes (Sifters, Mining Rigs, BHE's)
 

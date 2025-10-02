@@ -18,7 +18,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public record BasicMiningRigRecipe(int powerCost, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
+public record BasicMiningRigRecipe(long powerCost, long basePowerConsumption, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
     @Override
     public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
         return true;
@@ -43,7 +43,8 @@ public record BasicMiningRigRecipe(int powerCost, float chance, float rolls, Lis
 
         public static final MapCodec<BasicMiningRigRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> {
             return inst.group(
-                    Codec.INT.fieldOf("powerCost").forGetter(BasicMiningRigRecipe::powerCost),
+                    Codec.LONG.fieldOf("powerCost").forGetter(BasicMiningRigRecipe::powerCost),
+                    Codec.LONG.fieldOf("basePowerConsumption").forGetter(BasicMiningRigRecipe::basePowerConsumption),
                     Codec.FLOAT.fieldOf("chance").forGetter(BasicMiningRigRecipe::chance),
                     Codec.FLOAT.fieldOf("rolls").forGetter(BasicMiningRigRecipe::rolls),
                     Codec.list(Codec.STRING).fieldOf("output").forGetter(BasicMiningRigRecipe::output)
@@ -51,7 +52,8 @@ public record BasicMiningRigRecipe(int powerCost, float chance, float rolls, Lis
         });
 
         public static final PacketCodec<RegistryByteBuf, BasicMiningRigRecipe> PACKET_CODEC = PacketCodec.tuple(
-                PacketCodecs.INTEGER, BasicMiningRigRecipe::powerCost,
+                PacketCodecs.VAR_LONG, BasicMiningRigRecipe::powerCost,
+                PacketCodecs.VAR_LONG, BasicMiningRigRecipe::basePowerConsumption,
                 PacketCodecs.FLOAT, BasicMiningRigRecipe::chance,
                 PacketCodecs.FLOAT, BasicMiningRigRecipe::rolls,
                 PacketCodecs.STRING.collect(PacketCodecs.toList()), BasicMiningRigRecipe::output,

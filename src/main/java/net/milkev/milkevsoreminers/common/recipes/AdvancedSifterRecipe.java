@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 import java.util.List;
 
-public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
+public record AdvancedSifterRecipe(ItemStack input, long powerCost, long basePowerConsumption, float chance, float rolls, List<String> output) implements Recipe<MilkevsSingleRecipeInput.Single> {
     @Override
     public boolean matches(MilkevsSingleRecipeInput.Single recipeInput, World world) {
         return input().getItem().equals(recipeInput.get().getItem());
@@ -53,7 +53,8 @@ public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float cha
         public static final MapCodec<AdvancedSifterRecipe> CODEC = RecordCodecBuilder.mapCodec(inst -> {
             return inst.group(
                 ItemStack.VALIDATED_CODEC.fieldOf("input").forGetter(AdvancedSifterRecipe::input),
-                Codec.INT.fieldOf("basePowerCost").forGetter(AdvancedSifterRecipe::basePowerCost),
+                Codec.LONG.fieldOf("powerCost").forGetter(AdvancedSifterRecipe::powerCost),
+                Codec.LONG.fieldOf("basePowerConsumption").forGetter(AdvancedSifterRecipe::basePowerConsumption),
                 Codec.FLOAT.fieldOf("chance").forGetter(AdvancedSifterRecipe::chance),
                 Codec.FLOAT.fieldOf("rolls").forGetter(AdvancedSifterRecipe::rolls),
                 Codec.list(Codec.STRING).fieldOf("output").forGetter(AdvancedSifterRecipe::output)
@@ -61,7 +62,8 @@ public record AdvancedSifterRecipe(ItemStack input, int basePowerCost, float cha
         
         public static final PacketCodec<RegistryByteBuf, AdvancedSifterRecipe> PACKET_CODEC = PacketCodec.tuple(
                 ItemStack.PACKET_CODEC, AdvancedSifterRecipe::input,
-                PacketCodecs.INTEGER, AdvancedSifterRecipe::basePowerCost,
+                PacketCodecs.VAR_LONG, AdvancedSifterRecipe::powerCost,
+                PacketCodecs.VAR_LONG, AdvancedSifterRecipe::basePowerConsumption,
                 PacketCodecs.FLOAT, AdvancedSifterRecipe::chance,
                 PacketCodecs.FLOAT, AdvancedSifterRecipe::rolls,
                 PacketCodecs.STRING.collect(PacketCodecs.toList()), AdvancedSifterRecipe::output,

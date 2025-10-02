@@ -4,7 +4,8 @@
     "count": 1,
     "id": "minecraft:sand"
   },
-  "basePowerCost": 1000,
+  "powerCost": 1000,
+  "basePowerConsumption": 5,
   "chance": 1.0,
   "rolls": 1.0,
   "output": [
