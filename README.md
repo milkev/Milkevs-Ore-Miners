@@ -12,11 +12,15 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 
    -advanced sifter block (incomplete recipes)
 
-   -tier 1 mining rig (no gui, no upgrade blocks, no io blocks, incomplete recipes)
+   -basic mining rig (no gui, no upgrade blocks, no io blocks, incomplete recipes)
+
+   -advanced mining rig (no gui, no upgrade blocks, no io blocks, incomplete recipes, no textures, unfinished multiblock settup)
 
 ## to do before release;
    
    -implement mining rigs T1-4
+
+   -implement recipe modifiers/lenses for mining rigs
    
    -implement black hole extractors T1-3
    
