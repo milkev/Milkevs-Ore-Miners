@@ -2,8 +2,11 @@ package net.milkev.milkevsoreminers.common.recipes;
 
 import com.mojang.datafixers.util.Either;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.recipes.miningRig.AdvancedMiningRigRecipe;
+import net.milkev.milkevsoreminers.common.recipes.miningRig.BasicMiningRigRecipe;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeManager;
@@ -50,19 +53,48 @@ public class RecipeUtils {
         output.iterator().forEachRemaining(string -> { 
             if(string.charAt(0) == '#') {
                 switch(string.substring(1).split(";")[0]) {
-                    case "milkevsoreminers:sifter":
+                    case "milkevsoreminers:sifter": {
                         ItemStack stack = Registries.ITEM.get(Identifier.of(string.substring(1).split(";")[1])).getDefaultStack();
                         if (stack != null) {
                             Optional<RecipeEntry<SifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(stack), world);
-                            if(matches.isPresent()) {
+                            if (matches.isPresent()) {
                                 matches.get().value().output().iterator().forEachRemaining(string1 -> {
                                     addItems(string1, items);
                                 });
                             }
                         }
-                        break; 
-                    case "milkevsoreminers:advanced_sifter":
                         break;
+                    }
+                    case "milkevsoreminers:advanced_sifter": {
+                        ItemStack stack = Registries.ITEM.get(Identifier.of(string.substring(1).split(";")[1])).getDefaultStack();
+                        if (stack != null) {
+                            Optional<RecipeEntry<AdvancedSifterRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.ADVANCED_SIFTER_RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(stack), world);
+                            if (matches.isPresent()) {
+                                matches.get().value().output().iterator().forEachRemaining(string1 -> {
+                                    addItems(string1, items);
+                                });
+                            }
+                        }
+                        break;
+                    }
+                    case "milkevsoreminers:basic_mining_rig": {
+                        Optional<RecipeEntry<BasicMiningRigRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.MINING_RIG.BASIC.RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(Items.ACACIA_FENCE.getDefaultStack()), world);
+                        if (matches.isPresent()) {
+                            matches.get().value().output().iterator().forEachRemaining(string1 -> {
+                                addItems(string1, items);
+                            });
+                        }
+                        break;
+                    }
+                    case "milkevsoreminers:advanced_mining_rig": {
+                        Optional<RecipeEntry<AdvancedMiningRigRecipe>> matches = world.getRecipeManager().getFirstMatch(MilkevsOreMiners.MINING_RIG.ADVANCED.RECIPE_TYPE, new MilkevsSingleRecipeInput.Single(Items.ACACIA_FENCE.getDefaultStack()), world);
+                        if (matches.isPresent()) {
+                            matches.get().value().output().iterator().forEachRemaining(string1 -> {
+                                addItems(string1, items);
+                            });
+                        }
+                        break;
+                    }
                 }
             } 
             else if(string.contains(";")) {

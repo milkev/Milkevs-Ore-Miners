@@ -8,13 +8,17 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.milkev.milkevsmultiblocklibrary.common.MilkevsMultiBlockLibrary;
 import net.milkev.milkevsoreminers.common.blockEntities.AdvancedSifterBlockEntity;
 import net.milkev.milkevsoreminers.common.blockEntities.SifterBlockEntity;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.AdvancedMiningRigBlockEntity;
 import net.milkev.milkevsoreminers.common.blockEntities.miningRig.BasicMiningRigBlockEntity;
 import net.milkev.milkevsoreminers.common.blocks.AdvancedSifterBlock;
-import net.milkev.milkevsoreminers.common.blocks.MiningRigBlock;
+import net.milkev.milkevsoreminers.common.blocks.miningRig.AdvancedMiningRigBlock;
+import net.milkev.milkevsoreminers.common.blocks.miningRig.BasicMiningRigBlock;
+import net.milkev.milkevsoreminers.common.blocks.miningRig.MiningRigBlock;
 import net.milkev.milkevsoreminers.common.blocks.SifterBlock;
 import net.milkev.milkevsoreminers.common.gui.AdvancedSifterScreenHandler;
 import net.milkev.milkevsoreminers.common.recipes.AdvancedSifterRecipe;
 import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
+import net.milkev.milkevsoreminers.common.recipes.miningRig.AdvancedMiningRigRecipe;
 import net.milkev.milkevsoreminers.common.recipes.miningRig.BasicMiningRigRecipe;
 import net.milkev.milkevsoreminers.common.util.BlockPosPayload;
 import net.minecraft.block.AbstractBlock;
@@ -71,7 +75,8 @@ public class MilkevsOreMiners implements ModInitializer {
 	
 	static public class MINING_RIG {
 		static public class BASIC {
-			public static final MiningRigBlock CONTROLLER = new MiningRigBlock(AbstractBlock.Settings.create().strength(50), 1);
+			public static final String ID = "MRbasic";
+			public static final MiningRigBlock CONTROLLER = new BasicMiningRigBlock(AbstractBlock.Settings.create().strength(5, 6));
 			public static final BlockEntityType<BasicMiningRigBlockEntity> BLOCK_ENTITY = BlockEntityType.Builder.create(BasicMiningRigBlockEntity::new, CONTROLLER).build();
 			public static final RecipeSerializer<BasicMiningRigRecipe> RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("basic_mining_rig"), new BasicMiningRigRecipe.MyRecipeSerializer());
 			public static final RecipeType<BasicMiningRigRecipe> RECIPE_TYPE = new RecipeType<BasicMiningRigRecipe>() {
@@ -80,17 +85,24 @@ public class MilkevsOreMiners implements ModInitializer {
 					return "basic_mining_rig";
 				}
 			};
-			public static final Block WALL = new Block(AbstractBlock.Settings.create().strength(50));
-			public static final Block GLASS = new TintedGlassBlock(AbstractBlock.Settings.create().nonOpaque().strength(50));
+			public static final Block WALL = new Block(AbstractBlock.Settings.create().strength(5, 6));
+			public static final Block GLASS = new TintedGlassBlock(AbstractBlock.Settings.create().nonOpaque().strength(3, 6));
 			//replace io with custom block
 			//should have: dynamic inventory size for different tiers, auto-push inventory option, io-storage, io-power, io-combined
-			public static final Block IO_STORAGE = new BarrelBlock(AbstractBlock.Settings.create().strength(50));
+			public static final Block IO_STORAGE = new BarrelBlock(AbstractBlock.Settings.create().strength(5, 6));
 		}
-	/*
-	//Advanced Mining Rig
-	public static final MiningRigBlock MINING_RIG_TIER_2_BLOCK = new MiningRigBlock(AbstractBlock.Settings.create().strength(50), 2);
-	public static final BlockEntityType<MiningRigTier2BlockEntity> MINING_RIG_TIER_2_BLOCK_ENTITY = BlockEntityType.Builder.create(MiningRigTier2BlockEntity::new, MINING_RIG_TIER_2_BLOCK).build();
-	
+		static public class ADVANCED {
+			public static final String ID = "MRadvanced";
+			public static final MiningRigBlock CONTROLLER = new AdvancedMiningRigBlock(AbstractBlock.Settings.create().strength(5.5f, 7));
+			public static final BlockEntityType<AdvancedMiningRigBlockEntity> BLOCK_ENTITY = BlockEntityType.Builder.create(AdvancedMiningRigBlockEntity::new, CONTROLLER).build();
+			public static final RecipeSerializer<AdvancedMiningRigRecipe> RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("advanced_mining_rig"), new AdvancedMiningRigRecipe.MyRecipeSerializer());
+			public static final RecipeType<AdvancedMiningRigRecipe> RECIPE_TYPE = new RecipeType<AdvancedMiningRigRecipe>() {
+				@Override
+				public String toString() {return "advanced_mining_rig";}};
+			public static final Block WALL = new Block(AbstractBlock.Settings.create().strength(5.5f, 7));
+			public static final Block GLASS = new TintedGlassBlock(AbstractBlock.Settings.create().nonOpaque().strength(3.5f, 7));
+			//io
+		}
 	
 	//Elite Mining Rig
 	//public static final MiningRigBlock MINING_RIG_TIER_3_BLOCK = new MiningRigBlock(FabricBlockSettings.create().strength(50), 3);
@@ -98,7 +110,6 @@ public class MilkevsOreMiners implements ModInitializer {
 	
 	//Ultimate Mining Rig
 	//public static final MiningRigBlock MINING_RIG_TIER_4_BLOCK = new MiningRigBlock(FabricBlockSettings.create().strength(50), 4);
-	 */
 	}
 	
 	public static ModConfig config;
@@ -111,44 +122,46 @@ public class MilkevsOreMiners implements ModInitializer {
 		config = AutoConfig.getConfigHolder(ModConfig.class).getConfig();
 		//idk, cloth config isnt letting me access any of the configs anywhere except in here so... if anyone knows a fix make a pull request or issue?
 		PowerCapacity.put("sifter", config.advancedSifterPowerCapacity);
-		PowerCapacity.put("MRbasic", config.basicMiningRigPowerCapacity);
-		PowerCapacity.put("MRadvanced", config.advancedMiningRigPowerCapacity);
+		PowerCapacity.put(MINING_RIG.BASIC.ID, config.basicMiningRigPowerCapacity);
+		PowerCapacity.put(MINING_RIG.ADVANCED.ID, config.advancedMiningRigPowerCapacity);
 		PowerCapacity.put("MRelite", config.eliteMiningRigPowerCapacity);
 		PowerCapacity.put("MRultimate", config.ultimateMiningRigPowerCapacity);
 		
 		//sifter
-		RegisterBlockItem("sifter", SIFTER_BLOCK, Rarity.UNCOMMON, ItemGroups.TOOLS);
-		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("sifter_block_entity"), SIFTER_BLOCK_ENTITY);
-		registerRecipe("sifter", SIFTER_RECIPE_TYPE);
+			RegisterBlockItem("sifter", SIFTER_BLOCK, Rarity.UNCOMMON, ItemGroups.TOOLS);
+			Registry.register(Registries.BLOCK_ENTITY_TYPE, id("sifter_block_entity"), SIFTER_BLOCK_ENTITY);
+			registerRecipe("sifter", SIFTER_RECIPE_TYPE);
 		
 		//advanced sifter
-		RegisterBlockItem("advanced_sifter", ADVANCED_SIFTER_BLOCK, Rarity.RARE, ItemGroups.TOOLS);
-		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("advanced_sifter_block_entity"), ADVANCED_SIFTER_BLOCK_ENTITY);
-		registerRecipe("advanced_sifter", ADVANCED_SIFTER_RECIPE_TYPE);
-		EnergyStorage.SIDED.registerForBlockEntity((AdvancedSifterBlockEntity, direction) -> AdvancedSifterBlockEntity.energyStorage, ADVANCED_SIFTER_BLOCK_ENTITY);
+			RegisterBlockItem("advanced_sifter", ADVANCED_SIFTER_BLOCK, Rarity.RARE, ItemGroups.TOOLS);
+			Registry.register(Registries.BLOCK_ENTITY_TYPE, id("advanced_sifter_block_entity"), ADVANCED_SIFTER_BLOCK_ENTITY);
+			registerRecipe("advanced_sifter", ADVANCED_SIFTER_RECIPE_TYPE);
+			EnergyStorage.SIDED.registerForBlockEntity((AdvancedSifterBlockEntity, direction) -> AdvancedSifterBlockEntity.energyStorage, ADVANCED_SIFTER_BLOCK_ENTITY);
 
 		
 		//basic mining rig
-		RegisterBlockItem("basic_mining_rig", MINING_RIG.BASIC.CONTROLLER, Rarity.RARE, ItemGroups.TOOLS);
-		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("basic_mining_rig_block_entity"), MINING_RIG.BASIC.BLOCK_ENTITY);
-		registerRecipe("basic_mining_rig", MINING_RIG.BASIC.RECIPE_TYPE);
-		MilkevsMultiBlockLibrary.typeList.add(MINING_RIG.BASIC.BLOCK_ENTITY);
-		EnergyStorage.SIDED.registerForBlockEntity((MiningRigTier1BlockEntity, direction) -> MiningRigTier1BlockEntity.energyStorage, MINING_RIG.BASIC.BLOCK_ENTITY);
-		RegisterBlockItem("basic_mining_rig_wall", MINING_RIG.BASIC.WALL, Rarity.RARE, ItemGroups.TOOLS);
-		RegisterBlockItem("basic_mining_rig_glass", MINING_RIG.BASIC.GLASS, Rarity.RARE, ItemGroups.TOOLS);
-		RegisterBlockItem("basic_io_storage", MINING_RIG.BASIC.IO_STORAGE, Rarity.RARE, ItemGroups.TOOLS);
-		/*
+			RegisterBlockItem("basic_mining_rig", MINING_RIG.BASIC.CONTROLLER, Rarity.RARE, ItemGroups.TOOLS);
+			Registry.register(Registries.BLOCK_ENTITY_TYPE, id("basic_mining_rig_block_entity"), MINING_RIG.BASIC.BLOCK_ENTITY);
+			registerRecipe("basic_mining_rig", MINING_RIG.BASIC.RECIPE_TYPE);
+			MilkevsMultiBlockLibrary.registerMultiblock(MINING_RIG.BASIC.BLOCK_ENTITY);
+			EnergyStorage.SIDED.registerForBlockEntity((basicMiningRigBlockEntity, direction) -> basicMiningRigBlockEntity.energyStorage, MINING_RIG.BASIC.BLOCK_ENTITY);
+			RegisterBlockItem("basic_mining_rig_wall", MINING_RIG.BASIC.WALL, Rarity.RARE, ItemGroups.TOOLS);
+			RegisterBlockItem("basic_mining_rig_glass", MINING_RIG.BASIC.GLASS, Rarity.RARE, ItemGroups.TOOLS);
+			RegisterBlockItem("basic_io_storage", MINING_RIG.BASIC.IO_STORAGE, Rarity.RARE, ItemGroups.TOOLS);
+		
 		//advanced mining rig
-		Registry.register(Registries.BLOCK_ENTITY_TYPE, id("mining_rig_tier_2_block_entity"), MINING_RIG_TIER_2_BLOCK_ENTITY);
-		RegisterBlock("mining_rig_tier_2", MINING_RIG_TIER_2_BLOCK, Rarity.RARE, ItemGroups.TOOLS);
-		//Registry.register(Registries.RECIPE_SERIALIZER, MiningRigTier2RecipeSerializer.id, MiningRigTier2RecipeSerializer.INSTANCE);
-		EnergyStorage.SIDED.registerForBlockEntity((MiningRigTier2BlockEntity, direction) -> MiningRigTier2BlockEntity.energyStorage, MINING_RIG_TIER_2_BLOCK_ENTITY);
+			RegisterBlockItem("advanced_mining_rig", MINING_RIG.ADVANCED.CONTROLLER, Rarity.RARE, ItemGroups.TOOLS);
+			Registry.register(Registries.BLOCK_ENTITY_TYPE, id("advanced_mining_rig_block_entity"), MINING_RIG.ADVANCED.BLOCK_ENTITY);
+			registerRecipe("advanced_mining_rig", MINING_RIG.ADVANCED.RECIPE_TYPE);
+			MilkevsMultiBlockLibrary.registerMultiblock(MINING_RIG.ADVANCED.BLOCK_ENTITY);
+			EnergyStorage.SIDED.registerForBlockEntity((advancedMiningRigBlockEntity, direction) -> advancedMiningRigBlockEntity.energyStorage, MINING_RIG.ADVANCED.BLOCK_ENTITY);
+			RegisterBlockItem("advanced_mining_rig_wall", MINING_RIG.ADVANCED.WALL, Rarity.RARE, ItemGroups.TOOLS);
+			RegisterBlockItem("advanced_mining_rig_glass", MINING_RIG.ADVANCED.GLASS, Rarity.RARE, ItemGroups.TOOLS);
+			//io
 		
 		//elite mining rig
 		
 		//ultimate mining rig
-		
-		*/
 		
 		System.out.println(MOD_ID + " Initialized");
 	}

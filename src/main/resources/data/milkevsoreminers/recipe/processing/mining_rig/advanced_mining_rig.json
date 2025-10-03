@@ -1,16 +1,9 @@
 {
   "type": "milkevsoreminers:advanced_mining_rig",
-  "powerCost": 1000,
-  "powerUsageSpeed": 100,
+  "powerCost": 2000,
+  "basePowerConsumption": 100,
+  "chance": 1.0,
+  "rolls": 1.0,
   "output": [
-    "100;minecraft:raw_iron",
-    "30;minecraft:raw_gold",
-    "50;minecraft:raw_copper",
-    "100;minecraft:diamond",
-    "30;minecraft:lapis_lazuli",
-    "20;minecraft:redstone",
-    "10;minecraft:glowstone_dust",
-    "10;minecraft:quartz",
-    "10;minecraft:emerald",
-    "10;minecraft:amethyst_shard"]
+    "#milkevsoreminers:basic_mining_rig"]
 }

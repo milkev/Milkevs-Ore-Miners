@@ -27,7 +27,7 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     
     public BasicMiningRigBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.MINING_RIG.BASIC.BLOCK_ENTITY, blockPos, blockState);
-        energyStorage.setCapacity(MilkevsOreMiners.PowerCapacity.get("MRbasic"));
+        energyStorage.setCapacity(MilkevsOreMiners.PowerCapacity.get(MilkevsOreMiners.MINING_RIG.BASIC.ID));
     }
 
     @Override
