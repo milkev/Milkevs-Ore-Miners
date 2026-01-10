@@ -2,6 +2,7 @@ package net.milkev.milkevsoreminers.common.blocks.miningRig;
 
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.blockEntities.miningRig.BasicMiningRigBlockEntity;
+import net.milkev.milkevsoreminers.common.gui.BasicMiningRigSceenHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.screen.NamedScreenHandlerFactory;

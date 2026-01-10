@@ -16,6 +16,7 @@ import net.milkev.milkevsoreminers.common.blocks.miningRig.BasicMiningRigBlock;
 import net.milkev.milkevsoreminers.common.blocks.miningRig.MiningRigBlock;
 import net.milkev.milkevsoreminers.common.blocks.SifterBlock;
 import net.milkev.milkevsoreminers.common.gui.AdvancedSifterScreenHandler;
+import net.milkev.milkevsoreminers.common.gui.BasicMiningRigSceenHandler;
 import net.milkev.milkevsoreminers.common.recipes.AdvancedSifterRecipe;
 import net.milkev.milkevsoreminers.common.recipes.SifterRecipe;
 import net.milkev.milkevsoreminers.common.recipes.miningRig.AdvancedMiningRigRecipe;
@@ -51,7 +52,7 @@ public class MilkevsOreMiners implements ModInitializer {
 	public static final String MOD_ID = "milkevsoreminers";
 	
 	//Sifter
-	public static final SifterBlock SIFTER_BLOCK = new SifterBlock(AbstractBlock.Settings.create().strength(50).nonOpaque());
+	public static final SifterBlock SIFTER_BLOCK = new SifterBlock(AbstractBlock.Settings.create().strength(4, 5).nonOpaque());
 	public static final BlockEntityType<SifterBlockEntity> SIFTER_BLOCK_ENTITY = BlockEntityType.Builder.create(SifterBlockEntity::new, SIFTER_BLOCK).build();
 	public static final RecipeSerializer<SifterRecipe> SIFTER_RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("sifter"), new SifterRecipe.MyRecipeSerializer());
 	public static final RecipeType<SifterRecipe> SIFTER_RECIPE_TYPE = new RecipeType<>() {
@@ -63,7 +64,7 @@ public class MilkevsOreMiners implements ModInitializer {
 	
 	
 	//Advanced Sifter
-	public static final AdvancedSifterBlock ADVANCED_SIFTER_BLOCK = new AdvancedSifterBlock(AbstractBlock.Settings.create().strength(50));
+	public static final AdvancedSifterBlock ADVANCED_SIFTER_BLOCK = new AdvancedSifterBlock(AbstractBlock.Settings.create().strength(4, 5));
 	public static final BlockEntityType<AdvancedSifterBlockEntity> ADVANCED_SIFTER_BLOCK_ENTITY = BlockEntityType.Builder.create(AdvancedSifterBlockEntity::new, ADVANCED_SIFTER_BLOCK).build();
 	public static final RecipeSerializer<AdvancedSifterRecipe> ADVANCED_SIFTER_RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("advanced_sifter"), new AdvancedSifterRecipe.MyRecipeSerializer());
 	public static final RecipeType<AdvancedSifterRecipe> ADVANCED_SIFTER_RECIPE_TYPE = new RecipeType<>() {
@@ -78,6 +79,7 @@ public class MilkevsOreMiners implements ModInitializer {
 			public static final String ID = "MRbasic";
 			public static final MiningRigBlock CONTROLLER = new BasicMiningRigBlock(AbstractBlock.Settings.create().strength(5, 6));
 			public static final BlockEntityType<BasicMiningRigBlockEntity> BLOCK_ENTITY = BlockEntityType.Builder.create(BasicMiningRigBlockEntity::new, CONTROLLER).build();
+			public static final ScreenHandlerType<BasicMiningRigSceenHandler> SCREEN_HANDLER = registerScreen("basic_mining_rig", BasicMiningRigSceenHandler::new, BlockPosPayload.PACKET_CODEC);
 			public static final RecipeSerializer<BasicMiningRigRecipe> RECIPE_SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, id("basic_mining_rig"), new BasicMiningRigRecipe.MyRecipeSerializer());
 			public static final RecipeType<BasicMiningRigRecipe> RECIPE_TYPE = new RecipeType<BasicMiningRigRecipe>() {
 				@Override

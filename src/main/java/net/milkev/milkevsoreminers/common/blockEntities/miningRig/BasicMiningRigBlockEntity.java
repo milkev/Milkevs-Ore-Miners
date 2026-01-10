@@ -1,6 +1,7 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.gui.BasicMiningRigSceenHandler;
 import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.recipes.miningRig.BasicMiningRigRecipe;
@@ -8,11 +9,16 @@ import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
@@ -68,6 +74,18 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
     @Override
     public float getRecipeRolls() {
         return this.rolls;
+    }
+    
+    private static final Text displayName = MilkevsOreMiners.makeTranslation("container.mining_rig.basic");
+    
+    @Override
+    public Text getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public @Nullable ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+        return new BasicMiningRigSceenHandler(syncId, playerInventory, this);
     }
 
     @Override

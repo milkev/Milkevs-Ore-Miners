@@ -33,7 +33,7 @@ public abstract class MiningRigBlock extends BlockWithEntity implements BlockEnt
         if(miningRigBlockEntity.isStructureValid()) {
             miningRigBlockEntity.getEnergyStorage().setAmount(1000 + miningRigBlockEntity.getEnergyStorage().getAmount());
             //insert case for tier
-            playerEntity.openHandledScreen(screenFactory);
+            playerEntity.openHandledScreen(miningRigBlockEntity);
             return ActionResult.CONSUME;
         }
         //id love to move this to the multiblock library, but unfortunately im pretty sure its impossible to do just from the block entity
