@@ -32,5 +32,7 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 ## to do after release;
 
    -add mod ores to recipes that i missed
+
+   -EMI support
    
    -probably fix bugs
