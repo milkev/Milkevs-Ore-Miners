@@ -35,11 +35,12 @@ public class BasicMiningRigScreen extends HandledScreen<BasicMiningRigSceenHandl
         drawMouseoverTooltip(context, mouseX, mouseY);
         //draw power bar
         BasicMiningRigBlockEntity blockEntity = this.handler.getBlockEntity();
-        /*float percent = (float) blockEntity.energyStorage.getAmount() / blockEntity.energyStorage.getCapacity();
-        int pixels = 52 - Math.round(percent * 52);
-        context.drawTexture(TEXTURE, this.x + 8, this.y + 18 + pixels, 177, 32 + pixels, 16, 52 - pixels);
+        //draw power bar
+        float percent = (float) blockEntity.energyStorage.getAmount() / blockEntity.energyStorage.getCapacity();
+        int pixels = (int) (52 - Math.floor(percent * 52));
+        context.drawTexture(TEXTURE, this.x + 14, this.y + 18 + pixels, 177, 32 + pixels, 16, 52 - pixels);
         //draw progress
-        pixels = 23 - Math.round(blockEntity.getProgress() * 23);
-        context.drawTexture(TEXTURE, this.x + 66, this.y + 35, 176, 14, 23 - pixels, 16);*/
+        pixels = (int) (47 - Math.floor(blockEntity.getProgress() * 47));
+        context.drawTexture(TEXTURE, this.x + 83, this.y + 24 + pixels, 176, 85 + pixels, 10, 48 - pixels);
     }
 }

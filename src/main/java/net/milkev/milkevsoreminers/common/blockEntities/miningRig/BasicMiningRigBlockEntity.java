@@ -63,7 +63,7 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
 
     @Override
     public long getPowerUsageSpeed() {
-        return basePowerConsumption;
+        return Math.min(basePowerConsumption, powerUsage);
     }
 
     @Override

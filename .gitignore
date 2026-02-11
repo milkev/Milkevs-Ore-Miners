@@ -8,3 +8,4 @@
 *.kra~
 /src/main/generated
 /remappedSrc
+*.png~

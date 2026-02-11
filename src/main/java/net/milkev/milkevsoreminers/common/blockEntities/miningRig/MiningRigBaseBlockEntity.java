@@ -7,7 +7,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.gui.BasicMiningRigSceenHandler;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.util.BlockPosPayload;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
@@ -15,25 +14,14 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -73,7 +61,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         cacheRecipe(world);
         //add timer to periodically check validity of structure
         if(isStructureValid()) {
-            if(laserHasLOS) {
+            if(laserHasLOS && !world.isReceivingRedstonePower(this.pos)) {
                 usePower();
                 if (powerUsage <= 0) {
                     Optional<Map.Entry<BlockPos, Block>> test = findFirstBlock(MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE);
@@ -93,10 +81,14 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
                                     }
                                     //System.out.println("commit transaction!");
                                     transaction.commit();
-                                    powerUsage = getPowerCost();
                                 }
                             }
                         }
+                        this.powerUsage = this.getPowerCost();
+                        markDirty();
+                    } else {
+                        //System.out.println("Unable to find Storage IO. Checking structure validity");
+                        validateStructure();
                     }
                 }
             } else {
@@ -131,8 +123,10 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         return this.energyStorage;
     }
     
+    public float getProgress() {return progress;}
+    
     public void usePower() {
-        if(this.getEnergyStorage().hasEnoughEnergy(getPowerUsageSpeed())) {
+        if(this.getEnergyStorage().hasEnoughEnergy(getPowerUsageSpeed()) && this.powerUsage > 0) {
             long use = this.getPowerUsageSpeed();
             if(this.getEnergyStorage().useExactly(use)) {
                 this.powerUsage -= use;
