@@ -113,7 +113,7 @@ public class AdvancedSifterBlockEntity extends BlockEntity implements BlockEntit
                                     cacheOutputStackList.put(recipe.input().getItem(), RecipeUtils.generateItemList(recipe.output(), world));
                                 }
                                 RecipeUtils.handleDrops(cacheOutputStackList.get(recipe.input().getItem()), recipe.rolls(), recipe.chance())
-                                        .iterator().forEachRemaining(inventory::addStack);
+                                        .iterator().forEachRemaining(stack -> inventory.addItemStack(stack, 1));
                                 inventory.removeStack(0, 1);
                                 if(inventory.getStack(0).getItem() != activeRecipe) {
                                     activeRecipe = ItemStack.EMPTY.getItem();

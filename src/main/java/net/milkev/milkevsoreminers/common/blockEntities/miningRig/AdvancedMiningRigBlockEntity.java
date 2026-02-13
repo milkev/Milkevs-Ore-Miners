@@ -1,22 +1,18 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.gui.BasicMiningRigSceenHandler;
 import net.milkev.milkevsoreminers.common.recipes.MilkevsSingleRecipeInput;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.recipes.miningRig.AdvancedMiningRigRecipe;
-import net.milkev.milkevsoreminers.common.util.BlockPosPayload;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -52,6 +48,15 @@ public class AdvancedMiningRigBlockEntity extends MiningRigBaseBlockEntity {
     }
 
     @Override
+    public void decacheRecipe() {
+        this.output = List.of();
+        this.chance = 0;
+        this.rolls = 0;
+        this.powerCost = 0;
+        this.basePowerConsumption = 0;
+    }
+
+    @Override
     public List<Item> getRecipeOutput() {
         return this.output;
     }
@@ -75,7 +80,22 @@ public class AdvancedMiningRigBlockEntity extends MiningRigBaseBlockEntity {
     public float getRecipeRolls() {
         return this.rolls;
     }
-    
+
+    @Override
+    public List<Block> validItemIOBlocks() {
+        return List.of(MilkevsOreMiners.MINING_RIG.ADVANCED.ITEM_STORAGE);
+    }
+
+    @Override
+    public List<Block> validEnergyIOBlocks() {
+        return List.of();
+    }
+
+    @Override
+    public List<Block> validLaserBlocks() {
+        return List.of(Blocks.GRAY_CONCRETE);
+    }
+
     private static final Text displayName = MilkevsOreMiners.makeTranslation("container.advanced_sifter");
     
     @Override
@@ -93,13 +113,13 @@ public class AdvancedMiningRigBlockEntity extends MiningRigBaseBlockEntity {
     protected Block[][][][] getStructureMatrixList() {
         //TODO 
         //make actual structure matrix for advanced mining rig (currently is just copy of basic)
-        Block[] wall = new Block[]{MilkevsOreMiners.MINING_RIG.ADVANCED.WALL}; //thse blocks are generic wall blocks that make up the majority of the structure
-        Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier has idr how many slots
+        Block[] wall = new Block[]{MilkevsOreMiners.MINING_RIG.ADVANCED.WALL}; //these blocks are generic wall blocks that make up the majority of the structure
+        Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier has 2? slots
         Block[] controller = new Block[]{MilkevsOreMiners.MINING_RIG.ADVANCED.CONTROLLER}; //this is the controller block, aka this block
-        Block[] io = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE}; //these blocks are IO blocks, either storage or power.
+        Block[] io = validItemIOBlocks().toArray(new Block[0]); //these blocks are IO blocks, either storage or power.
         Block[] glass = new Block[]{MilkevsOreMiners.MINING_RIG.ADVANCED.GLASS}; //these blocks are the view windows
+        Block[] beaminizer = validLaserBlocks().toArray(new Block[0]); //the block that "creates" the beam
         Block[] requiredEmpty = new Block[]{Blocks.STRUCTURE_VOID}; //these blocks MUST be air
-        Block[] beaminizer = new Block[]{Blocks.GRAY_CONCRETE}; //the block that "creates" the beam
         Block[] oOS = new Block[]{Blocks.AIR}; //we dont care what these blocks are
         return new Block[][][][]{
                 {//y1

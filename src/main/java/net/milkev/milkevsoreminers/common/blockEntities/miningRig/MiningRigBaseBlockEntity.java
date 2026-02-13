@@ -1,32 +1,31 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.BaseMiningRigStorageBlockEntity;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.util.BlockPosPayload;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload> {
     
@@ -42,53 +41,84 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
     //for use in gui
     float progress = 0;
     boolean laserHasLOS = false;
-
+    boolean firstTick = true;
+    int refreshValidateTimer = 0;
+    private Optional<Map<BlockPos, Block>> ioItemBlocks = Optional.empty();
+    private Optional<Map<BlockPos, Block>> ioEnergyBlocks = Optional.empty();
+    private Optional<Map.Entry<BlockPos, Block>> laserBlock = Optional.empty();
 
     public MiningRigBaseBlockEntity(BlockEntityType blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
     }
     
     public abstract void cacheRecipe(World world);
+    public abstract void decacheRecipe();
     public abstract List<Item> getRecipeOutput();
     public abstract long getPowerCost();
     public abstract long getPowerUsageSpeed();
     public abstract float getRecipeChance();
     public abstract float getRecipeRolls();
+    public abstract List<Block> validItemIOBlocks();
+    public abstract List<Block> validEnergyIOBlocks();
+    public abstract List<Block> validLaserBlocks();
 
+    //invalidate structure if it doesnt contain atleast 1 item IO and 1 energy IO block
+    @Override
+    public void validateStructure() {
+        super.validateStructure();
+        if(!checkIoItemBlock()) {
+            invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_item_io"));
+        } else if(!checkIoEnergyBlock() && false) {
+            invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_energy_io"));
+        }
+        if(isStructureValid()) {
+            laserBlock = findFirstBlockFromList(validLaserBlocks());
+            //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot and /reload is basically not an option if you have more than a small handful of mods anyway
+            cacheRecipe(world);
+        } else {
+            laserBlock = Optional.empty();
+            decacheRecipe();
+        }
+    }
+    
+    @Override
+    public void invalidateStructure(MutableText text) {
+        super.invalidateStructure(text);
+        laserBlock = Optional.empty();
+        decacheRecipe();
+    }
+    
     @Override
     public void tick(World world, BlockPos blockPos, BlockState blockState, MultiBlockEntity blockEntity) {
-        //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot and /reload is basically not an option if you have more than a small handful of mods anyway
-        cacheRecipe(world);
-        //add timer to periodically check validity of structure
+        if(firstTick) {
+            validateStructure();
+        }
+        //we'll use this to periodically check if the structure is still valid. this will also refresh references to io blocks and stuff, which should only really matter if they've been moved to a different spot on the structure but who knows
+        refreshValidateTimer += MilkevsOreMiners.validStructureCheckTimer <= 0 ? 0 : 1;
+        if(refreshValidateTimer > MilkevsOreMiners.validStructureCheckTimer) {
+            validateStructure();
+        }
         if(isStructureValid()) {
-            if(laserHasLOS && !world.isReceivingRedstonePower(this.pos)) {
-                usePower();
-                if (powerUsage <= 0) {
-                    Optional<Map.Entry<BlockPos, Block>> test = findFirstBlock(MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE);
-                    if(test.isPresent()) {
-                        Map.Entry<BlockPos, Block> entry = test.get();
-                        Block blockStructure = entry.getValue();
-                        BlockPos blockPosStructure = entry.getKey();
-                        if (blockStructure == MilkevsOreMiners.MINING_RIG.BASIC.IO_STORAGE) {
-                            //replace with not-pointless-transaction method to be built into IO_STORAGE block
-                            Storage<ItemVariant> itemStorage = ItemStorage.SIDED.find(getWorld(), blockPosStructure, Direction.DOWN);
-                            if (itemStorage != null) {
-                                try (Transaction transaction = Transaction.openOuter()) {
-                                    Iterator<ItemStack> iterator1 = RecipeUtils.handleDrops(getRecipeOutput(), getRecipeRolls(), getRecipeChance()).iterator();
-                                    while (iterator1.hasNext()) {
-                                        ItemStack itemStack = iterator1.next();
-                                        itemStorage.insert(ItemVariant.of(itemStack), 1, transaction);
+            if(laserHasLOS) {
+                if(!world.isReceivingRedstonePower(this.pos)) {
+                    usePower();
+                    if (powerUsage <= 0) {
+                        List<ItemStack> output = RecipeUtils.handleDrops(getRecipeOutput(), getRecipeRolls(), getRecipeChance());
+                        if (ioItemBlocks.isPresent()) {
+                            Set<BlockPos> ioItemBlocksPos = ioItemBlocks.get().keySet();
+                            ioItemBlocksPos.iterator().forEachRemaining(ioBlockPos -> {
+                                if (!output.isEmpty()) {
+                                    BlockEntity storageBlockEntityUnsure = world.getBlockEntity(ioBlockPos);
+                                    if (storageBlockEntityUnsure instanceof BaseMiningRigStorageBlockEntity storageBlockEntity) {
+                                        List<ItemStack> remainder = storageBlockEntity.getInventory().addItems(output);
+                                        output.clear();
+                                        output.addAll(remainder);
                                     }
-                                    //System.out.println("commit transaction!");
-                                    transaction.commit();
                                 }
-                            }
+                            });
                         }
                         this.powerUsage = this.getPowerCost();
                         markDirty();
-                    } else {
-                        //System.out.println("Unable to find Storage IO. Checking structure validity");
-                        validateStructure();
                     }
                 }
             } else {
@@ -101,7 +131,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
     }
     
     private boolean checkLaserLOS() {
-        Optional<Map.Entry<BlockPos, Block>> test = findFirstBlock(Blocks.GRAY_CONCRETE);
+        Optional<Map.Entry<BlockPos, Block>> test = findFirstBlockFromList(validLaserBlocks());
         if(test.isEmpty()) {
             //System.out.println("couldnt find laser block");
             return false;
@@ -135,6 +165,29 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
             markDirty();
         }
     }
+    
+    //return false if none found, update list if found
+    public boolean checkIoItemBlock() {
+        Optional<Map<BlockPos, Block>> check = findAllOfBlockFromList(validItemIOBlocks());
+        if(check.isPresent()) {
+            ioItemBlocks = check;
+        } else {
+            ioItemBlocks = Optional.empty();
+        }
+        return check.isPresent();
+    }
+    
+    //return false if none found, update list if found
+    public boolean checkIoEnergyBlock() {
+        Optional<Map<BlockPos, Block>> check = findAllOfBlockFromList(validEnergyIOBlocks());
+        if(check.isPresent()) {
+            ioEnergyBlocks = check;
+        } else {
+            ioEnergyBlocks = Optional.empty();
+        }
+        return check.isPresent();
+    }
+    
     @Override
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
 

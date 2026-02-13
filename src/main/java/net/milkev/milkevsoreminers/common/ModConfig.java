@@ -6,6 +6,8 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name="milkevsoreminers")
 public class ModConfig implements ConfigData {
+    @Comment("How many ticks between checks to see if a valid structure is still valid. Set to 0 or lower to disable. May cause issues if disabled! Default: 20 (1 second)")
+    int validStructureCheckTimer = 20;
     @Comment("Energy capacity of the advanced sifter. Default: ?")
     long advancedSifterPowerCapacity = 10000;
     @Comment("Energy capacity of the basic mining rig. Default: ?")

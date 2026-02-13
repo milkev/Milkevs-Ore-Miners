@@ -43,8 +43,8 @@ public abstract class MiningRigBlock extends BlockWithEntity implements BlockEnt
             return ActionResult.CONSUME;
         }
         
-        //this call base multiblockentity which is needed for logic to enable/disable preview
-        return miningRigBlockEntity.interact(blockState, world, blockPos, playerEntity, blockHitResult);
+        //needed for logic to enable/disable preview
+        return miningRigBlockEntity.togglePreview(playerEntity);
     }
 
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {

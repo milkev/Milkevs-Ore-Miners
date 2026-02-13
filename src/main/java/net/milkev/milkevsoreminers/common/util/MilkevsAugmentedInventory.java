@@ -1,10 +1,17 @@
 package net.milkev.milkevsoreminers.common.util;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public interface MilkevsAugmentedInventory extends Inventory {
  
@@ -84,25 +91,50 @@ public interface MilkevsAugmentedInventory extends Inventory {
     }
 
     /**
-     * Attempts to add the requested stack into the inventory, starting at the second slot (intended for use with machine processing)
-     * Only expects to get stacks with a count of 1
-     * Returns the remainder of the stack, which will either be a stack with a count of 0 or the original stack that was passed through
+     * Attempts to add the requested stack into the inventory, starting at the specified slot (intended for use with machine processing)
+     * Returns the remainder of the stack
      **/
-    default ItemStack addStack(ItemStack stack) {
-        for(int i = 1; i < size(); i++) {
+    default ItemStack addItemStack(ItemStack stack, int slotStart) {
+        System.out.println("addItemStack debug | stack: " + stack + " slotStart: " + slotStart + " size: " + size() + " currentInventory: " + getItems());
+        for(int i = slotStart; i < size(); i++) {
+            System.out.println("Adding stack " + stack);
             if(getStack(i).isEmpty()) {
                 //System.out.println("Set a stack (" + stack + ") in slot " + i);
                 this.setStack(i, stack);
                 stack = ItemStack.EMPTY;
                 return stack;
             } else if(getStack(i).getCount() < getStack(i).getMaxCount() && getStack(i).isOf(stack.getItem())) {
-                this.getStack(i).increment(1);
-                stack = ItemStack.EMPTY;
-                //System.out.println("Added to a stack in slot " + i);
-                return stack;
+                int moved = getStack(i).getCount() + stack.getCount() < getStack(i).getMaxCount() ? stack.getCount() : getStack(i).getCount() + stack.getCount() - stack.getMaxCount();
+                System.out.println("moved: " + moved + " ourStack: " + getStack(i) + " theirStack: " + stack);
+                this.getStack(i).increment(moved);
+                stack.decrement(moved);
+                if(stack.isEmpty()) {
+                    return stack;
+                }
             }
         }
         return stack;
+    }
+    /**
+     * Same as above but add to any slot
+     */
+    default ItemStack addItemStack(ItemStack stack) {
+        return addItemStack(stack, 0);
+    }
+
+    /**
+     * Add a list of items to inventory. Returns list of items that were not added
+     */
+    default List<ItemStack> addItems(List<ItemStack> listStack) {
+        List<ItemStack> remainder = new ArrayList<>();
+        for(int i = 0; i < listStack.size(); i++) {
+            System.out.println("Calling addItemStack with " + listStack.get(i));
+            ItemStack stack = addItemStack(listStack.get(i));
+            if(!stack.isEmpty()) {
+                remainder.add(stack);
+            }
+        }
+        return remainder;
     }
 
     /**
@@ -147,5 +179,34 @@ public interface MilkevsAugmentedInventory extends Inventory {
 
     default int getMaxCountPerStack() {
         return 64;
+    }
+    
+    //return null if no items found
+    //return slot number if found
+    @Nullable
+    default Integer getFirstFilledSlot() {
+        if(isEmpty()) { return null; }
+        for(int i = 0; i < this.size(); i++) {
+            if(!getStack(i).isEmpty()) {
+                return i;
+            }
+        }
+        return null;
+    }
+    
+    default long exportAny(Storage<ItemVariant> target, int amount, Transaction transaction) {
+        int stacks = (int) Math.ceil((double) amount /64);
+        long total = 0;
+        for(int i = 0; i < stacks; i++) {
+            Integer slot = getFirstFilledSlot();
+            if(slot != null) {
+                long moved = target.insert(ItemVariant.of(getStack(slot)), amount, transaction);
+                this.removeStack(slot, (int) moved);
+                total += moved;
+            } else {
+                break;
+            }
+        }
+        return total;
     }
 }

@@ -1,5 +1,8 @@
 {
   "milkevsoreminers.container.advanced_sifter": "Advanced Sifter",
   "milkevsoreminers.notification.incomplete_structure": "Structure incomplete (crouch right click to view preview or use multiblock builder)",
-  "milkevsoreminers.container.mining_rig.basic:": "Basic Mining Rig"
+  "milkevsoreminers.container.mining_rig.basic:": "Basic Mining Rig",
+  "milkevsoreminers.container.mining_rig.basic.storage": "Basic Storage",
+  "milkevsoreminers.notification.missing_item_io": "Structure needs to contain atleast 1 Item IO Block! This can replace any non-glass wall structure block",
+  "milkevsoreminers.notification.missing_energy_io": "Structure needs to contain atleast 1 Energy IO Block! This can replace any non-glass wall structure block"
 }
