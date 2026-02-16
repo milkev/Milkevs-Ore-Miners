@@ -4,12 +4,10 @@
     "count": 1,
     "id": "minecraft:sand"
   },
-  "chance": 1.0,
-  "rolls": 1.5,
+  "chance": 0.33,
+  "rolls": 1.0,
   "output": [
-    "1;minecraft:dirt",
-    "2;minecraft:glass",
-    "3;#minecraft:arrows",
-    "1;mekanism:osmium_ingot"
+    "5;minecraft:redstone",
+    "2;minecraft:glowstone_dust"
   ]
 }

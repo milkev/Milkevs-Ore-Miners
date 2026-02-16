@@ -8,6 +8,8 @@
   "rolls": 1.0,
   "output": [
     "1;minecraft:diamond",
-    "#milkevsoreminers:sifter;minecraft:sand"
+    "20;minecraft:raw_iron",
+    "15:minecraft:raw_copper",
+    "10:minecraft:raw_gold"
   ]
 }

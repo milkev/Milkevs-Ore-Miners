@@ -2,12 +2,12 @@
   "type": "milkevsoreminers:advanced_sifter",
   "input": {
     "count": 1,
-    "id": "minecraft:sand"
+    "id": "minecraft:dirt"
   },
   "powerCost": 1000,
   "basePowerConsumption": 5,
   "chance": 1.0,
   "rolls": 1.0,
   "output": [
-    "#milkevsoreminers:sifter;minecraft:sand"]
+    "#milkevsoreminers:sifter;minecraft:dirt"]
 }
