@@ -1,0 +1,6 @@
+{
+  "replace": false,
+  "values": [
+    {"id": "iceandfire:raw_silver", "required": false }
+  ]
+}

@@ -107,13 +107,30 @@ public class RecipeUtils {
     private static void addItems(String output, List<Item> list) {
         //if use tag instead of item identifier, will just select the first item in the tag
         if(output.split(";")[1].charAt(0) == '#') {
+            //test if there is preferred entry from tag
+            if(output.contains("[")) {
+                Item item = Registries.ITEM.get(Identifier.of(output.split("\\[")[1].split("]")[0]));
+                //check if preferred entry is real
+                if (!Objects.equals(item.getDefaultStack().getRegistryEntry().getIdAsString(), "minecraft:air")) {
+                    for (int i = 0; i < Integer.valueOf(output.split(";")[0]); i++) {
+                        list.add(item);
+                    }
+                    //call return after adding preferred tag entry, prevents first item in tag from being added
+                    return;
+                } else {
+                    //remove preferred tag entry so that rest of code runs properly
+                    output = output.replace(output.substring(output.split("\\[").length+1, output.split("]").length+1), "");
+                }
+            }
+            //add first item found in tag. at this point the game has already filtered out non-existant tag entries for us, so we just need to check if the tag exists.
+            final String outputF = output;
             TagKey<Item> tagKey = TagKey.of(RegistryKeys.ITEM, Identifier.of(output.split(";")[1].substring(1)));
             List<Either<RegistryKey<Item>, Item>> tagList = Registries.ITEM.getEntryList(tagKey).map(entryList -> entryList.stream().map(RegistryEntry::getKeyOrValue).toList()).orElse(new ArrayList<>());
             tagList.get(0).ifLeft(left -> 
-                    addItems(output.split(";")[0].concat(";").concat(left.getValue().toString()), list));
+                    addItems(outputF.split(";")[0].concat(";").concat(left.getValue().toString()), list));
             
         } else {
-            Item item = Registries.ITEM.get(Identifier.of(output.split(";")[1]));
+            Item item = Registries.ITEM.get(Identifier.of(output.split(";")[1].split("\\[")[0]));
             //if the item was not found in the registry, silently skip the entry
             if (!Objects.equals(item.getDefaultStack().getRegistryEntry().getIdAsString(), "minecraft:air")) {
                 for (int i = 0; i < Integer.valueOf(output.split(";")[0]); i++) {

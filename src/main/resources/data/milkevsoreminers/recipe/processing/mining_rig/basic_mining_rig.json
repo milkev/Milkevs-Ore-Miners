@@ -5,15 +5,14 @@
   "chance": 1.0,
   "rolls": 1.0,
   "output": [
-    "100;minecraft:raw_iron",
-    "30;minecraft:raw_gold",
-    "50;minecraft:raw_copper",
-    "1;minecraft:diamond",
-    "30;minecraft:lapis_lazuli",
-    "20;minecraft:redstone",
-    "10;minecraft:glowstone_dust",
-    "10;minecraft:quartz",
-    "10;minecraft:emerald",
-    "10;minecraft:amethyst_shard",
-    "5;mekanism:raw_osmium"]
+    "40;minecraft:raw_iron",
+    "20;minecraft:raw_gold",
+    "35;minecraft:raw_copper",
+    "15;minecraft:lapis_lazuli",
+    "15;minecraft:redstone",
+    "5;minecraft:glowstone_dust",
+    "5;minecraft:quartz",
+    "2;minecraft:emerald",
+    "1;minecraft:amethyst_shard",
+    "5;#c:raw_silver"]
 }

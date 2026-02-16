@@ -74,6 +74,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         if(isStructureValid()) {
             laserBlock = findFirstBlockFromList(validLaserBlocks());
             //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot and /reload is basically not an option if you have more than a small handful of mods anyway
+            //note that this is cached in block data, and is not saved, so simply breaking and replacing the block, or unloading and reloading the chunk should update the cache
             cacheRecipe(world);
         } else {
             laserBlock = Optional.empty();
