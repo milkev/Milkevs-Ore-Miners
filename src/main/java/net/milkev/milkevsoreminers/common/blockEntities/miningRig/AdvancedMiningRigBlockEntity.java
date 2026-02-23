@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Optional;
 
-public class AdvancedMiningRigBlockEntity extends MiningRigBaseBlockEntity {
+public class AdvancedMiningRigBlockEntity extends BaseMiningRigBlockEntity {
     
     List<Item> output;
     float chance;

@@ -1,4 +1,4 @@
-package net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable;
+package net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.io;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
@@ -33,7 +33,9 @@ public abstract class BaseMiningRigStorageBlockEntity extends BlockEntity implem
     public int transferCooldown = 0;
     private int transferProgress;
     //how many items are attempted to be transferred
-    public int transferRate = 0;
+    public long transferRate = 0;
+    //changes each tick to allow exporting full transfer rate per tick even if items have to be exported to different sides to achieve it
+    private long transferCapacity = 0;
     
     public BaseMiningRigStorageBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(MilkevsOreMiners.MINING_RIG.BASIC.ITEM_STORAGE_BLOCK_ENTITY, blockPos, blockState);
@@ -46,10 +48,13 @@ public abstract class BaseMiningRigStorageBlockEntity extends BlockEntity implem
         transferProgress--;
         if(transferProgress <= 0) {
             transferProgress = transferCooldown;
+            transferCapacity = transferRate;
             if(tryExport(world, blockPos, Direction.NORTH)) {}
                 else if(tryExport(world, blockPos, Direction.EAST)) {}
                 else if(tryExport(world, blockPos, Direction.SOUTH)) {}
                 else if(tryExport(world, blockPos, Direction.WEST)) {}
+                else if(tryExport(world, blockPos, Direction.UP)) {}
+                else if(tryExport(world, blockPos, Direction.DOWN)) {}
         }
         markDirty();
     }
@@ -63,7 +68,8 @@ public abstract class BaseMiningRigStorageBlockEntity extends BlockEntity implem
             long moved = getInventory().exportAny(target, transferRate, transaction);
             if(moved > 0) {
                 transaction.commit();
-                return true;
+                transferCapacity -= moved;
+                return transferCapacity <= 0;
             }
         }
         

@@ -20,10 +20,9 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
-public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
+public class BasicMiningRigBlockEntity extends BaseMiningRigBlockEntity {
     
     List<Item> output;
     float chance;
@@ -92,7 +91,7 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
 
     @Override
     public List<Block> validEnergyIOBlocks() {
-        return List.of();
+        return List.of(MilkevsOreMiners.MINING_RIG.BASIC.ENERGY_BLOCK);
     }
 
     @Override
@@ -112,62 +111,64 @@ public class BasicMiningRigBlockEntity extends MiningRigBaseBlockEntity{
 
     @Override
     protected Block[][][][] getStructureMatrixList() {
-        Block[] wall = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.WALL}; //thse blocks are generic wall blocks that make up the majority of the structure
-        Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier does not have any upgrade slots.
+        List<Block> wallList = new java.util.ArrayList<>(List.of(MilkevsOreMiners.MINING_RIG.BASIC.WALL));
+        wallList.addAll(validEnergyIOBlocks());
+        wallList.addAll(validItemIOBlocks());
+        Block[] wall = wallList.toArray(new Block[0]); //thse blocks are generic wall blocks that make up the majority of the structure
+        //Block[] upgradeSlot = new Block[]{Blocks.ORANGE_CONCRETE}; //these are slots for upgrades. this tier does not have any upgrade slots.
         Block[] controller = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.CONTROLLER}; //this is the controller block, aka this block
-        Block[] io = validItemIOBlocks().toArray(new Block[0]); //these blocks are IO blocks, either storage or power.
-        Block[] glass = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.GLASS}; //these blocks are the view windows
+        Block[] glas = new Block[]{MilkevsOreMiners.MINING_RIG.BASIC.GLASS}; //these blocks are the view windows
         Block[] beaminizer = validLaserBlocks().toArray(new Block[0]); //the block that "creates" the beam
-        Block[] requiredEmpty = new Block[]{Blocks.STRUCTURE_VOID}; //these blocks MUST be air
-        Block[] oOS = new Block[]{Blocks.AIR}; //we dont care what these blocks are
+        Block[] air  = new Block[]{Blocks.STRUCTURE_VOID}; //these blocks MUST be air
+        Block[] oOS  = new Block[]{Blocks.AIR}; //we dont care what these blocks are "out Of Structure"
         return new Block[][][][]{
                 {//y1
-                        {wall, wall, wall, oOS},
-                        {wall, requiredEmpty, wall, oOS},
-                        {wall, wall, wall, oOS},
-                        {wall, wall, wall, oOS}
+                        {wall, wall, wall, oOS },
+                        {wall, air , wall, oOS },
+                        {wall, wall, wall, oOS },
+                        {wall, wall, wall, oOS }
                 },
                 {//y2
-                        {wall, wall, wall, oOS},
-                        {wall, requiredEmpty, wall, oOS},
-                        {wall, wall, wall, oOS},
-                        {io, controller, io, oOS}
+                        {wall, wall, wall, oOS },
+                        {wall, air , wall, oOS },
+                        {wall, wall, wall, oOS },
+                        {wall, controller, wall, oOS }
                 },
                 {//y3
-                        {oOS, wall, oOS, oOS},
-                        {glass, requiredEmpty, glass, oOS},
-                        {wall, wall, wall, oOS},
-                        {wall, wall, wall, oOS}
+                        {oOS , wall, oOS , oOS },
+                        {glas, air , glas, oOS },
+                        {wall, wall, wall, oOS },
+                        {wall, wall, wall, oOS }
                 },
                 {//y4
-                        {oOS, wall, oOS, oOS},
-                        {glass, requiredEmpty, glass, oOS},
-                        {wall, wall, wall, oOS},
-                        {oOS, wall, oOS, oOS}
+                        {oOS , wall, oOS , oOS },
+                        {glas, air , glas, oOS },
+                        {wall, wall, wall, oOS },
+                        {oOS , wall, oOS , oOS }
                 },
                 {//y5
-                        {oOS, wall, oOS, oOS},
-                        {glass, requiredEmpty, glass, oOS},
-                        {wall, wall, wall, oOS},
-                        {oOS, wall, oOS, oOS}
+                        {oOS , wall, oOS , oOS },
+                        {glas, air , glas, oOS },
+                        {wall, wall, wall, oOS },
+                        {oOS , wall, oOS , oOS }
                 },
                 {//y6
-                        {oOS, wall, oOS, oOS},
-                        {wall, beaminizer, wall, oOS},
-                        {wall, wall, wall, oOS},
-                        {oOS, wall, oOS, oOS}
+                        {oOS , wall, oOS , oOS },
+                        {wall, beaminizer, wall, oOS },
+                        {wall, wall, wall, oOS },
+                        {oOS , wall, oOS , oOS }
                 },
                 {//y7
-                        {oOS, wall, oOS, oOS},
-                        {wall, wall, wall, oOS},
-                        {wall, wall, wall, oOS},
-                        {oOS, wall, oOS, oOS}
+                        {oOS , wall, oOS , oOS },
+                        {wall, wall, wall, oOS },
+                        {wall, wall, wall, oOS },
+                        {oOS , wall, oOS , oOS }
                 },
                 {//y8
-                        {oOS, oOS, oOS, oOS},
-                        {oOS, wall, oOS, oOS},
-                        {oOS, wall, oOS, oOS},
-                        {oOS, wall, oOS, oOS}
+                        {oOS , oOS , oOS , oOS },
+                        {oOS , wall, oOS , oOS },
+                        {oOS , wall, oOS , oOS },
+                        {oOS , wall, oOS , oOS }
                 }
         };
     }

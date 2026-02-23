@@ -95,9 +95,9 @@ public interface MilkevsAugmentedInventory extends Inventory {
      * Returns the remainder of the stack
      **/
     default ItemStack addItemStack(ItemStack stack, int slotStart) {
-        System.out.println("addItemStack debug | stack: " + stack + " slotStart: " + slotStart + " size: " + size() + " currentInventory: " + getItems());
+        //System.out.println("addItemStack debug | stack: " + stack + " slotStart: " + slotStart + " size: " + size() + " currentInventory: " + getItems());
         for(int i = slotStart; i < size(); i++) {
-            System.out.println("Adding stack " + stack);
+            //System.out.println("Adding stack " + stack);
             if(getStack(i).isEmpty()) {
                 //System.out.println("Set a stack (" + stack + ") in slot " + i);
                 this.setStack(i, stack);
@@ -105,7 +105,7 @@ public interface MilkevsAugmentedInventory extends Inventory {
                 return stack;
             } else if(getStack(i).getCount() < getStack(i).getMaxCount() && getStack(i).isOf(stack.getItem())) {
                 int moved = getStack(i).getCount() + stack.getCount() < getStack(i).getMaxCount() ? stack.getCount() : getStack(i).getCount() + stack.getCount() - stack.getMaxCount();
-                System.out.println("moved: " + moved + " ourStack: " + getStack(i) + " theirStack: " + stack);
+                //System.out.println("moved: " + moved + " ourStack: " + getStack(i) + " theirStack: " + stack);
                 this.getStack(i).increment(moved);
                 stack.decrement(moved);
                 if(stack.isEmpty()) {
@@ -194,7 +194,7 @@ public interface MilkevsAugmentedInventory extends Inventory {
         return null;
     }
     
-    default long exportAny(Storage<ItemVariant> target, int amount, Transaction transaction) {
+    default long exportAny(Storage<ItemVariant> target, long amount, Transaction transaction) {
         int stacks = (int) Math.ceil((double) amount /64);
         long total = 0;
         for(int i = 0; i < stacks; i++) {

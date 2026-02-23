@@ -7,7 +7,7 @@ import team.reborn.energy.api.base.SimpleEnergyStorage;
 
 public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> implements EnergyStorage {
     
-    private long amount;
+    private long energy;
     private long capacity;
     private float ioFactor;
     private boolean insert;
@@ -24,7 +24,7 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     }
     
     public boolean hasEnoughEnergy(long amount) {
-        if(this.amount >= amount) {
+        if(this.energy >= amount) {
             return true;
         }
         return false;
@@ -32,22 +32,23 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
 
     @Override
     protected Long createSnapshot() {
-        return this.amount;
+        return this.energy;
     }
 
     @Override
     protected void readSnapshot(Long snapshot) {
-        this.amount = snapshot;
+        this.energy = snapshot;
     }
 
+    //returns amount successfully inserted instead of remainder? wtf me
     @Override
     public long insert(long amount, TransactionContext transactionContext) {
         if(!this.supportsInsertion()) { return 0;}
         if(amount > 0) {
-            long inserted = Math.min(this.getIoRate(), Math.min(amount, this.capacity - this.amount));
+            long inserted = Math.min(this.getIoRate(), Math.min(amount, this.capacity - this.energy));
             if(inserted > 0) {
                 this.updateSnapshots(transactionContext);
-                this.amount += inserted;
+                this.energy += inserted;
                 return inserted;
             }
         }
@@ -58,19 +59,20 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     public long extract(long amount, TransactionContext transactionContext) {
         if(!this.supportsExtraction()) { return 0;}
         if(amount > 0) {
-            long inserted = Math.min(this.getIoRate(), Math.min(amount, this.capacity));
-            if(inserted > 0) {
+            long extract = Math.min(Math.min(Math.min(this.energy, this.capacity), this.getIoRate()), amount);
+            if(extract > 0) {
                 this.updateSnapshots(transactionContext);
-                this.amount -= inserted;
-                return inserted;
+                //System.out.println("Calling to extract " + extract + "rf while holding " + this.energy + "rf");
+                this.energy -= extract;
+                return extract;
             }
         }
         return 0;
     }
     
     public boolean useExactly(long amount) {
-        if(this.amount >= amount) {
-            this.amount -= amount;
+        if(this.energy >= amount) {
+            this.energy -= amount;
             return true;
         }
         return false;
@@ -88,7 +90,7 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
 
     @Override
     public long getAmount() {
-        return this.amount;
+        return this.energy;
     }
 
     @Override
@@ -97,18 +99,22 @@ public class MilkevsAugmentedEnergyStorage extends SnapshotParticipant<Long> imp
     }
     
     public long getIoRate() {
-        return (long) (this.ioFactor * this.capacity);
+        return (long) this.ioFactor * this.capacity;
+    }
+    
+    public boolean isFull() {
+        return this.energy >= this.getCapacity();
     }
     
     public void setCapacity(long newCapacity) {
         this.capacity = newCapacity;
-        if(this.amount > newCapacity) {
-            this.amount = newCapacity;
+        if(this.energy > newCapacity) {
+            this.energy = newCapacity;
         }
     }
     
     //hard set amount, just implemented for reading from nbt data
     public void setAmount(long amount) {
-        this.amount = Math.min(this.capacity, amount);
+        this.energy = Math.min(this.capacity, amount);
     }
 }

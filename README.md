@@ -8,13 +8,17 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 
 ## whats currently included/functional in the unpublished beta;
 
-   -basic sifter block (incomplete recipes, needs visual for what blocks being sifted & sift progress)
+   -basic sifter block (incomplete crafting recipe, needs visual for what blocks being sifted & sift progress)
 
-   -advanced sifter block (incomplete recipes)
+   -advanced sifter block (incomplete crafting recipe)
 
-   -basic mining rig (no power io block, incomplete recipes)
+   -basic mining rig (incomplete crafting recipe, laser render)
 
-   -advanced mining rig (no gui, no upgrade blocks, no io blocks, incomplete recipes, no textures, unfinished multiblock settup)
+   -basic io energy block needs texture
+   -basic io item block needs seperated texture from energy block
+   -io item block needs screen
+
+   -advanced mining rig (no gui, no upgrade blocks, no io blocks, incomplete crafting recipe, no textures, unfinished multiblock settup)
 
 ## to do before public beta release;
    

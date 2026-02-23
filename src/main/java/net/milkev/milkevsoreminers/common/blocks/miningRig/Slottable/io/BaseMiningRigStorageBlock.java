@@ -1,23 +1,34 @@
-package net.milkev.milkevsoreminers.common.blocks.miningRig.Slottable;
+package net.milkev.milkevsoreminers.common.blocks.miningRig.Slottable.io;
 
 import com.mojang.serialization.MapCodec;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.BaseMiningRigStorageBlockEntity;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.MiningRigStorageBlockEntityAdvanced;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.MiningRigStorageBlockEntityBasic;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.io.BaseMiningRigStorageBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
-public class MiningRigStorageBlock extends BlockWithEntity implements BlockEntityProvider {
+public abstract class BaseMiningRigStorageBlock extends BlockWithEntity implements BlockEntityProvider {
     
-    private int tier;
-    public MiningRigStorageBlock(Settings settings, int tier) {
+    NamedScreenHandlerFactory screenFactory;
+    public BaseMiningRigStorageBlock(Settings settings, NamedScreenHandlerFactory factory) {
         super(settings);
-        tier = tier;
+        screenFactory = factory;
+    }
+    
+    @Override
+    public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockHitResult blockHitResult) {
+        if(world.isClient) {return ActionResult.SUCCESS;}
+        if(!playerEntity.isSneaking()) {
+            playerEntity.openHandledScreen((BaseMiningRigStorageBlockEntity) world.getBlockEntity(blockPos));
+            return ActionResult.CONSUME;
+        }
+        return super.onUse(blockState, world, blockPos, playerEntity, blockHitResult);
     }
 
     @Override
@@ -45,13 +56,4 @@ public class MiningRigStorageBlock extends BlockWithEntity implements BlockEntit
         return BlockRenderType.MODEL;
     }
 
-    @Nullable
-    @Override
-    public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState) {
-        switch (tier) {
-            case 1: return new MiningRigStorageBlockEntityBasic(blockPos, blockState);
-            case 2: return new MiningRigStorageBlockEntityAdvanced(blockPos, blockState);
-            default: return null;
-        }
-    }
 }

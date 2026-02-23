@@ -126,8 +126,10 @@ public class RecipeUtils {
             final String outputF = output;
             TagKey<Item> tagKey = TagKey.of(RegistryKeys.ITEM, Identifier.of(output.split(";")[1].substring(1)));
             List<Either<RegistryKey<Item>, Item>> tagList = Registries.ITEM.getEntryList(tagKey).map(entryList -> entryList.stream().map(RegistryEntry::getKeyOrValue).toList()).orElse(new ArrayList<>());
-            tagList.get(0).ifLeft(left -> 
-                    addItems(outputF.split(";")[0].concat(";").concat(left.getValue().toString()), list));
+            if(!tagList.isEmpty()) {
+                tagList.get(0).ifLeft(left ->
+                        addItems(outputF.split(";")[0].concat(";").concat(left.getValue().toString()), list));
+            }
             
         } else {
             Item item = Registries.ITEM.get(Identifier.of(output.split(";")[1].split("\\[")[0]));

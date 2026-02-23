@@ -1,9 +1,11 @@
 package net.milkev.milkevsoreminers.common.blockEntities.miningRig;
 
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.BaseMiningRigStorageBlockEntity;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.io.BaseMiningRigEnergyBlockEntity;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.Slottable.io.BaseMiningRigStorageBlockEntity;
 import net.milkev.milkevsoreminers.common.recipes.RecipeUtils;
 import net.milkev.milkevsoreminers.common.util.BlockPosPayload;
 import net.milkev.milkevsoreminers.common.util.MilkevsAugmentedEnergyStorage;
@@ -22,12 +24,9 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
-public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload> {
+public abstract class BaseMiningRigBlockEntity extends MultiBlockEntity implements ExtendedScreenHandlerFactory<BlockPosPayload> {
     
     public MilkevsAugmentedEnergyStorage energyStorage = new MilkevsAugmentedEnergyStorage(50000, 1, true, false) {
         @Override
@@ -47,7 +46,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
     private Optional<Map<BlockPos, Block>> ioEnergyBlocks = Optional.empty();
     private Optional<Map.Entry<BlockPos, Block>> laserBlock = Optional.empty();
 
-    public MiningRigBaseBlockEntity(BlockEntityType blockEntityType, BlockPos blockPos, BlockState blockState) {
+    public BaseMiningRigBlockEntity(BlockEntityType blockEntityType, BlockPos blockPos, BlockState blockState) {
         super(blockEntityType, blockPos, blockState);
     }
     
@@ -66,15 +65,18 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
     @Override
     public void validateStructure() {
         super.validateStructure();
-        if(!checkIoItemBlock()) {
-            invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_item_io"));
-        } else if(!checkIoEnergyBlock() && false) {
-            invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_energy_io"));
+        if(isStructureValid()) {
+            if (!checkIoItemBlock()) {
+                invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_item_io"));
+            } else if (!checkIoEnergyBlock()) {
+                invalidateStructure(Text.translatable("milkevsoreminers.notification.missing_energy_io"));
+            }
         }
         if(isStructureValid()) {
             laserBlock = findFirstBlockFromList(validLaserBlocks());
+            ioItemBlocks = findAllOfBlockFromList(validItemIOBlocks());
             //caching the recipe so it doesnt get called potentially every tick. Im aware that this means it wont obey /reload, however this boosts performance a lot and /reload is basically not an option if you have more than a small handful of mods anyway
-            //note that this is cached in block data, and is not saved, so simply breaking and replacing the block, or unloading and reloading the chunk should update the cache
+            //note that this is not saved, so simply breaking and replacing the block, or unloading and reloading the chunk should update the cache
             cacheRecipe(world);
         } else {
             laserBlock = Optional.empty();
@@ -82,10 +84,13 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         }
     }
     
+    //void sum variables when the structure is invalidated
     @Override
     public void invalidateStructure(MutableText text) {
         super.invalidateStructure(text);
         laserBlock = Optional.empty();
+        ioItemBlocks = Optional.empty();
+        ioEnergyBlocks = Optional.empty();
         decacheRecipe();
     }
     
@@ -126,11 +131,13 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
                 laserHasLOS = checkLaserLOS();
                 markDirty();
             }
+            obtainPower(world);
         } else {
             validateStructure();
         }
     }
     
+    //if the laser has los to the void
     private boolean checkLaserLOS() {
         Optional<Map.Entry<BlockPos, Block>> test = findFirstBlockFromList(validLaserBlocks());
         if(test.isEmpty()) {
@@ -150,12 +157,15 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         return true;
     }
     
+    //om nom energy storage
     public MilkevsAugmentedEnergyStorage getEnergyStorage() {
         return this.energyStorage;
     }
     
+    //get progress of recipe
     public float getProgress() {return progress;}
     
+    //consume power to progress recipe
     public void usePower() {
         if(this.getEnergyStorage().hasEnoughEnergy(getPowerUsageSpeed()) && this.powerUsage > 0) {
             long use = this.getPowerUsageSpeed();
@@ -164,6 +174,32 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
             }
             progress = 1 - ((float) powerUsage / (float) getPowerCost());
             markDirty();
+        }
+    }
+    
+    //steal power from all power io blocks in structure
+    public void obtainPower(World world) {
+        if(ioEnergyBlocks.isPresent() && !this.energyStorage.isFull()) {
+            Iterator<BlockPos> iterator = ioEnergyBlocks.get().keySet().iterator();
+            while(iterator.hasNext()) {
+                BlockPos entry = iterator.next();
+                BlockEntity be = world.getBlockEntity(entry);
+                if(be != null) {
+                    if(be instanceof BaseMiningRigEnergyBlockEntity miningRigPowerBlockEntity) {
+                        try(Transaction tx = Transaction.openOuter()) {
+                            //System.out.println("io block contains " + miningRigPowerBlockEntity.getEnergyStorage().getAmount());
+                            long out = miningRigPowerBlockEntity.extract(this.energyStorage.getIoRate(), tx);
+                            long leftover = out - this.energyStorage.insert(out, tx);
+                            miningRigPowerBlockEntity.getEnergyStorage().insert(leftover, tx);
+                            //System.out.println("Attempted to eat " + out + "rf from block at " + entry + " with " + leftover + "rf leftover");
+                            tx.commit();
+                        }
+                        if(this.energyStorage.isFull()) {
+                            iterator.remove();
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -189,6 +225,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         return check.isPresent();
     }
     
+    //nbt go brr
     @Override
     public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
 
@@ -209,6 +246,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         progress = nbt.getFloat("progress");
     }
 
+    //screen go brr
     @Override
     public BlockPosPayload getScreenOpeningData(ServerPlayerEntity player) {
         return new BlockPosPayload(this.pos);
@@ -219,6 +257,7 @@ public abstract class MiningRigBaseBlockEntity extends MultiBlockEntity implemen
         return createNbt(registries);
     }
 
+    //still not implemented, one day TM
     @Override
     protected boolean structureCanRotateVertically() {
         return false;

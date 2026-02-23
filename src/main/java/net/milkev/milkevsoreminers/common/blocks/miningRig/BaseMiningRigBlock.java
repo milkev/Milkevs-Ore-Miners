@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.milkev.milkevsmultiblocklibrary.common.MilkevsMultiBlockLibrary;
 import net.milkev.milkevsmultiblocklibrary.common.blockEntities.MultiBlockEntity;
 import net.milkev.milkevsoreminers.common.MilkevsOreMiners;
-import net.milkev.milkevsoreminers.common.blockEntities.miningRig.MiningRigBaseBlockEntity;
+import net.milkev.milkevsoreminers.common.blockEntities.miningRig.BaseMiningRigBlockEntity;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
@@ -18,10 +18,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
-public abstract class MiningRigBlock extends BlockWithEntity implements BlockEntityProvider {
+public abstract class BaseMiningRigBlock extends BlockWithEntity implements BlockEntityProvider {
     
     NamedScreenHandlerFactory screenFactory;
-    public MiningRigBlock(Settings settings, NamedScreenHandlerFactory factory) {
+    public BaseMiningRigBlock(Settings settings, NamedScreenHandlerFactory factory) {
         super(settings);
         screenFactory = factory;
     }
@@ -29,10 +29,10 @@ public abstract class MiningRigBlock extends BlockWithEntity implements BlockEnt
     @Override
     public ActionResult onUse(BlockState blockState, World world, BlockPos blockPos, PlayerEntity playerEntity, BlockHitResult blockHitResult) {
         if(world.isClient) {return ActionResult.SUCCESS;}
-        MiningRigBaseBlockEntity miningRigBlockEntity = (MiningRigBaseBlockEntity) world.getBlockEntity(blockPos);
+        BaseMiningRigBlockEntity miningRigBlockEntity = (BaseMiningRigBlockEntity) world.getBlockEntity(blockPos);
         if(miningRigBlockEntity.isStructureValid()) {
-            miningRigBlockEntity.getEnergyStorage().setAmount(1000 + miningRigBlockEntity.getEnergyStorage().getAmount());
-            //insert case for tier
+            //miningRigBlockEntity.getEnergyStorage().setAmount(1000 + miningRigBlockEntity.getEnergyStorage().getAmount());
+            //insert case for tier?
             playerEntity.openHandledScreen(miningRigBlockEntity);
             return ActionResult.CONSUME;
         }
