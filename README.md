@@ -14,8 +14,6 @@ Adds various ways to obtain ores in an automated fashion, everything from siftin
 
    -basic mining rig (incomplete crafting recipe, laser render)
 
-   -basic io energy block needs texture
-   -basic io item block needs seperated texture from energy block
    -io item block needs screen
 
    -advanced mining rig (no gui, no upgrade blocks, no io blocks, incomplete crafting recipe, no textures, unfinished multiblock settup)
